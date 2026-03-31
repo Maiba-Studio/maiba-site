@@ -2,20 +2,64 @@
 
 import { useEffect, useState, FormEvent } from "react";
 import AdminShell from "@/components/admin/AdminShell";
-import type { SiteContent } from "@/lib/data";
+import type { SiteContent, SocialLink } from "@/lib/data";
+
+type Tab = "hero" | "about" | "contact" | "ritual";
+
+const defaultRitual: SiteContent["ritual"] = {
+  title: ":: Maiba Manifesto ::",
+  lines: [
+    "We are the moths who chose the flame.",
+    "Not because we are blind,",
+    "but because we refuse to live in the dark.",
+    "",
+    "Every deviation is an act of devotion.",
+    "Every creation is a prayer we refuse to whisper.",
+    "",
+    "We build what the world did not ask for.",
+    "We make what we would regret not making.",
+    "We follow the light—not because it is safe,",
+    "but because it is ours.",
+    "",
+    "This is the Maiba way.",
+    "Deviant. Sacred. Unfinished.",
+    "",
+    "Burn bright.",
+    "Be moth.",
+    "Seek light.",
+  ],
+  accentLines: ["Burn bright.", "Be moth.", "Seek light."],
+  highlightLines: ["This is the Maiba way."],
+  closingAttribution: "— Fragment I · Written in the dark",
+};
 
 export default function SiteContentPage() {
   const [content, setContent] = useState<SiteContent | null>(null);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
-  const [activeTab, setActiveTab] = useState<"hero" | "about" | "contact">(
-    "hero"
-  );
+  const [activeTab, setActiveTab] = useState<Tab>("hero");
 
   useEffect(() => {
     fetch("/api/site-content")
       .then((r) => r.json())
-      .then(setContent);
+      .then((data: Partial<SiteContent>) => {
+        setContent({
+          ...data,
+          about: {
+            ...data.about!,
+            founderImage: data.about?.founderImage ?? "",
+            alterEgoImage: data.about?.alterEgoImage ?? "",
+          },
+          contact: {
+            ...data.contact!,
+            socialLinks: (data.contact?.socialLinks ?? []).map((l) => ({
+              ...l,
+              icon: (l as SocialLink).icon ?? "",
+            })),
+          },
+          ritual: data.ritual ?? defaultRitual,
+        } as SiteContent);
+      });
   }, []);
 
   const handleSave = async (e: FormEvent) => {
@@ -43,11 +87,47 @@ export default function SiteContentPage() {
     );
   }
 
-  const tabs = [
-    { id: "hero" as const, label: "Hero" },
-    { id: "about" as const, label: "About" },
-    { id: "contact" as const, label: "Contact" },
+  const tabs: { id: Tab; label: string }[] = [
+    { id: "hero", label: "Hero" },
+    { id: "about", label: "About" },
+    { id: "contact", label: "Contact" },
+    { id: "ritual", label: "Ritual" },
   ];
+
+  const updateAbout = (patch: Partial<SiteContent["about"]>) =>
+    setContent({ ...content, about: { ...content.about, ...patch } });
+
+  const updateSocialLink = (index: number, patch: Partial<SocialLink>) => {
+    const links = [...content.contact.socialLinks];
+    links[index] = { ...links[index], ...patch };
+    setContent({
+      ...content,
+      contact: { ...content.contact, socialLinks: links },
+    });
+  };
+
+  const addSocialLink = () => {
+    setContent({
+      ...content,
+      contact: {
+        ...content.contact,
+        socialLinks: [
+          ...content.contact.socialLinks,
+          { label: "", href: "", icon: "" },
+        ],
+      },
+    });
+  };
+
+  const removeSocialLink = (index: number) => {
+    setContent({
+      ...content,
+      contact: {
+        ...content.contact,
+        socialLinks: content.contact.socialLinks.filter((_, i) => i !== index),
+      },
+    });
+  };
 
   return (
     <AdminShell>
@@ -58,7 +138,6 @@ export default function SiteContentPage() {
         </p>
       </div>
 
-      {/* Tabs */}
       <div className="flex gap-1 mb-8 border-b border-malamaya-border/20">
         {tabs.map((tab) => (
           <button
@@ -76,217 +155,179 @@ export default function SiteContentPage() {
       </div>
 
       <form onSubmit={handleSave} className="max-w-2xl space-y-6">
+        {/* ── Hero ── */}
         {activeTab === "hero" && (
           <>
             <Field label="Title">
-              <input
-                type="text"
-                value={content.hero.title}
-                onChange={(e) =>
-                  setContent({
-                    ...content,
-                    hero: { ...content.hero, title: e.target.value },
-                  })
-                }
-                className="admin-input"
-              />
+              <input type="text" value={content.hero.title} onChange={(e) => setContent({ ...content, hero: { ...content.hero, title: e.target.value } })} className="admin-input" />
             </Field>
             <Field label="Tagline">
-              <input
-                type="text"
-                value={content.hero.tagline}
-                onChange={(e) =>
-                  setContent({
-                    ...content,
-                    hero: { ...content.hero, tagline: e.target.value },
-                  })
-                }
-                className="admin-input"
-              />
+              <input type="text" value={content.hero.tagline} onChange={(e) => setContent({ ...content, hero: { ...content.hero, tagline: e.target.value } })} className="admin-input" />
             </Field>
             <Field label="Hover Text">
-              <input
-                type="text"
-                value={content.hero.hoverText}
-                onChange={(e) =>
-                  setContent({
-                    ...content,
-                    hero: { ...content.hero, hoverText: e.target.value },
-                  })
-                }
-                className="admin-input"
-              />
+              <input type="text" value={content.hero.hoverText} onChange={(e) => setContent({ ...content, hero: { ...content.hero, hoverText: e.target.value } })} className="admin-input" />
             </Field>
             <Field label="Scroll Cue Text">
-              <input
-                type="text"
-                value={content.hero.scrollCue}
-                onChange={(e) =>
-                  setContent({
-                    ...content,
-                    hero: { ...content.hero, scrollCue: e.target.value },
-                  })
-                }
-                className="admin-input"
-              />
+              <input type="text" value={content.hero.scrollCue} onChange={(e) => setContent({ ...content, hero: { ...content.hero, scrollCue: e.target.value } })} className="admin-input" />
             </Field>
           </>
         )}
 
+        {/* ── About ── */}
         {activeTab === "about" && (
           <>
             <Field label="Origin Section Title">
-              <input
-                type="text"
-                value={content.about.originTitle}
-                onChange={(e) =>
-                  setContent({
-                    ...content,
-                    about: { ...content.about, originTitle: e.target.value },
-                  })
-                }
-                className="admin-input"
-              />
+              <input type="text" value={content.about.originTitle} onChange={(e) => updateAbout({ originTitle: e.target.value })} className="admin-input" />
             </Field>
             <Field label="Origin Lines" hint="One line per paragraph">
-              <textarea
-                value={content.about.originLines.join("\n")}
-                onChange={(e) =>
-                  setContent({
-                    ...content,
-                    about: {
-                      ...content.about,
-                      originLines: e.target.value.split("\n"),
-                    },
-                  })
-                }
-                rows={4}
-                className="admin-input resize-y"
-              />
+              <textarea value={content.about.originLines.join("\n")} onChange={(e) => updateAbout({ originLines: e.target.value.split("\n") })} rows={4} className="admin-input resize-y" />
             </Field>
             <Field label="Eye Section Paragraphs" hint="One per line">
-              <textarea
-                value={content.about.eyeParagraphs.join("\n")}
-                onChange={(e) =>
-                  setContent({
-                    ...content,
-                    about: {
-                      ...content.about,
-                      eyeParagraphs: e.target.value.split("\n"),
-                    },
-                  })
-                }
-                rows={6}
-                className="admin-input resize-y"
-              />
+              <textarea value={content.about.eyeParagraphs.join("\n")} onChange={(e) => updateAbout({ eyeParagraphs: e.target.value.split("\n") })} rows={6} className="admin-input resize-y" />
             </Field>
-            <div className="grid grid-cols-2 gap-4">
-              <Field label="Founder Name">
-                <input
-                  type="text"
-                  value={content.about.founderName}
-                  onChange={(e) =>
-                    setContent({
-                      ...content,
-                      about: {
-                        ...content.about,
-                        founderName: e.target.value,
-                      },
-                    })
-                  }
-                  className="admin-input"
-                />
+
+            {/* Founder */}
+            <div className="border border-malamaya-border/20 rounded-sm p-5 space-y-4">
+              <p className="text-xs tracking-widest uppercase text-malamaya-light">Founder</p>
+              <div className="grid grid-cols-2 gap-4">
+                <Field label="Name">
+                  <input type="text" value={content.about.founderName} onChange={(e) => updateAbout({ founderName: e.target.value })} className="admin-input" />
+                </Field>
+                <Field label="Role">
+                  <input type="text" value={content.about.founderRole} onChange={(e) => updateAbout({ founderRole: e.target.value })} className="admin-input" />
+                </Field>
+              </div>
+              <Field label="Profile Picture URL">
+                <input type="url" value={content.about.founderImage} onChange={(e) => updateAbout({ founderImage: e.target.value })} className="admin-input" placeholder="https://..." />
               </Field>
-              <Field label="Alter Ego Name">
-                <input
-                  type="text"
-                  value={content.about.alterEgoName}
-                  onChange={(e) =>
-                    setContent({
-                      ...content,
-                      about: {
-                        ...content.about,
-                        alterEgoName: e.target.value,
-                      },
-                    })
-                  }
-                  className="admin-input"
-                />
-              </Field>
+              {content.about.founderImage && (
+                <div className="flex items-center gap-4">
+                  <img src={content.about.founderImage} alt="Founder preview" className="w-16 h-16 rounded-full object-cover border border-malamaya-border/30" />
+                  <span className="text-malamaya text-xs">Preview</span>
+                </div>
+              )}
             </div>
+
+            {/* Alter Ego */}
+            <div className="border border-malamaya-border/20 rounded-sm p-5 space-y-4">
+              <p className="text-xs tracking-widest uppercase text-malamaya-light">Alter Ego</p>
+              <div className="grid grid-cols-2 gap-4">
+                <Field label="Name">
+                  <input type="text" value={content.about.alterEgoName} onChange={(e) => updateAbout({ alterEgoName: e.target.value })} className="admin-input" />
+                </Field>
+                <Field label="Role">
+                  <input type="text" value={content.about.alterEgoRole} onChange={(e) => updateAbout({ alterEgoRole: e.target.value })} className="admin-input" />
+                </Field>
+              </div>
+              <Field label="Profile Picture URL">
+                <input type="url" value={content.about.alterEgoImage} onChange={(e) => updateAbout({ alterEgoImage: e.target.value })} className="admin-input" placeholder="https://..." />
+              </Field>
+              {content.about.alterEgoImage && (
+                <div className="flex items-center gap-4">
+                  <img src={content.about.alterEgoImage} alt="Alter ego preview" className="w-16 h-16 rounded-full object-cover border border-malamaya-border/30" />
+                  <span className="text-malamaya text-xs">Preview</span>
+                </div>
+              )}
+            </div>
+
+            <Field label="Founder Bio Paragraphs" hint="One per line">
+              <textarea value={content.about.founderParagraphs.join("\n")} onChange={(e) => updateAbout({ founderParagraphs: e.target.value.split("\n") })} rows={4} className="admin-input resize-y" />
+            </Field>
             <Field label="Ethos List" hint="One per line">
-              <textarea
-                value={content.about.ethosList.join("\n")}
-                onChange={(e) =>
-                  setContent({
-                    ...content,
-                    about: {
-                      ...content.about,
-                      ethosList: e.target.value.split("\n"),
-                    },
-                  })
-                }
-                rows={5}
-                className="admin-input resize-y"
-              />
+              <textarea value={content.about.ethosList.join("\n")} onChange={(e) => updateAbout({ ethosList: e.target.value.split("\n") })} rows={5} className="admin-input resize-y" />
             </Field>
           </>
         )}
 
+        {/* ── Contact ── */}
         {activeTab === "contact" && (
           <>
             <Field label="Section Title">
-              <input
-                type="text"
-                value={content.contact.title}
-                onChange={(e) =>
-                  setContent({
-                    ...content,
-                    contact: { ...content.contact, title: e.target.value },
-                  })
-                }
-                className="admin-input"
-              />
+              <input type="text" value={content.contact.title} onChange={(e) => setContent({ ...content, contact: { ...content.contact, title: e.target.value } })} className="admin-input" />
             </Field>
             <Field label="Subtitle">
+              <textarea value={content.contact.subtitle} onChange={(e) => setContent({ ...content, contact: { ...content.contact, subtitle: e.target.value } })} rows={3} className="admin-input resize-none" />
+            </Field>
+
+            <div>
+              <div className="flex items-center justify-between mb-3">
+                <label className="text-xs tracking-widest uppercase text-malamaya">
+                  Social Links
+                </label>
+                <button
+                  type="button"
+                  onClick={addSocialLink}
+                  className="text-xs text-maiba-red hover:text-maiba-red/80 transition-colors tracking-widest uppercase"
+                >
+                  + Add Link
+                </button>
+              </div>
+
+              <div className="space-y-3">
+                {content.contact.socialLinks.map((link, i) => (
+                  <div key={i} className="border border-malamaya-border/20 rounded-sm p-4 space-y-3">
+                    <div className="grid grid-cols-3 gap-3">
+                      <Field label="Label">
+                        <input type="text" value={link.label} onChange={(e) => updateSocialLink(i, { label: e.target.value })} className="admin-input" placeholder="Twitter" />
+                      </Field>
+                      <Field label="URL">
+                        <input type="text" value={link.href} onChange={(e) => updateSocialLink(i, { href: e.target.value })} className="admin-input" placeholder="https://..." />
+                      </Field>
+                      <Field label="Icon URL" hint="optional thumbnail">
+                        <input type="text" value={link.icon} onChange={(e) => updateSocialLink(i, { icon: e.target.value })} className="admin-input" placeholder="https://icon..." />
+                      </Field>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      {link.icon && (
+                        <img src={link.icon} alt="" className="w-5 h-5 rounded-sm object-contain" />
+                      )}
+                      <button
+                        type="button"
+                        onClick={() => removeSocialLink(i)}
+                        className="text-[10px] text-maiba-red/60 hover:text-maiba-red tracking-widest uppercase transition-colors ml-auto"
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </>
+        )}
+
+        {/* ── Ritual ── */}
+        {activeTab === "ritual" && (
+          <>
+            <Field label="Manifesto Title">
+              <input type="text" value={content.ritual.title} onChange={(e) => setContent({ ...content, ritual: { ...content.ritual, title: e.target.value } })} className="admin-input" />
+            </Field>
+            <Field label="Manifesto Lines" hint="One line per row. Empty lines create spacing.">
               <textarea
-                value={content.contact.subtitle}
-                onChange={(e) =>
-                  setContent({
-                    ...content,
-                    contact: { ...content.contact, subtitle: e.target.value },
-                  })
-                }
-                rows={3}
-                className="admin-input resize-none"
+                value={content.ritual.lines.join("\n")}
+                onChange={(e) => setContent({ ...content, ritual: { ...content.ritual, lines: e.target.value.split("\n") } })}
+                rows={18}
+                className="admin-input resize-y font-mono text-sm"
               />
             </Field>
-            <Field label="Social Links" hint="Format: Label|URL — one per line">
+            <Field label="Accent Lines" hint="Lines rendered bold + red. One per row, must match a manifesto line exactly.">
               <textarea
-                value={content.contact.socialLinks
-                  .map((l) => `${l.label}|${l.href}`)
-                  .join("\n")}
-                onChange={(e) =>
-                  setContent({
-                    ...content,
-                    contact: {
-                      ...content.contact,
-                      socialLinks: e.target.value
-                        .split("\n")
-                        .filter((l) => l.trim())
-                        .map((l) => {
-                          const [label, href] = l.split("|");
-                          return {
-                            label: label?.trim() || "",
-                            href: href?.trim() || "",
-                          };
-                        }),
-                    },
-                  })
-                }
+                value={content.ritual.accentLines.join("\n")}
+                onChange={(e) => setContent({ ...content, ritual: { ...content.ritual, accentLines: e.target.value.split("\n").filter((l) => l.trim()) } })}
                 rows={4}
-                className="admin-input resize-none"
+                className="admin-input resize-y font-mono text-sm"
               />
+            </Field>
+            <Field label="Highlight Lines" hint="Lines rendered in white (foreground). One per row.">
+              <textarea
+                value={content.ritual.highlightLines.join("\n")}
+                onChange={(e) => setContent({ ...content, ritual: { ...content.ritual, highlightLines: e.target.value.split("\n").filter((l) => l.trim()) } })}
+                rows={3}
+                className="admin-input resize-y font-mono text-sm"
+              />
+            </Field>
+            <Field label="Closing Attribution">
+              <input type="text" value={content.ritual.closingAttribution} onChange={(e) => setContent({ ...content, ritual: { ...content.ritual, closingAttribution: e.target.value } })} className="admin-input font-mono text-sm" />
             </Field>
           </>
         )}

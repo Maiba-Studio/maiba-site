@@ -20,6 +20,12 @@ export interface FieldNote {
   updatedAt: string;
 }
 
+export interface SocialLink {
+  label: string;
+  href: string;
+  icon: string;
+}
+
 export interface SiteContent {
   hero: {
     title: string;
@@ -36,15 +42,24 @@ export interface SiteContent {
     founderParagraphs: string[];
     founderName: string;
     founderRole: string;
+    founderImage: string;
     alterEgoName: string;
     alterEgoRole: string;
+    alterEgoImage: string;
     ethosTitle: string;
     ethosList: string[];
   };
   contact: {
     title: string;
     subtitle: string;
-    socialLinks: { label: string; href: string }[];
+    socialLinks: SocialLink[];
+  };
+  ritual: {
+    title: string;
+    lines: string[];
+    accentLines: string[];
+    highlightLines: string[];
+    closingAttribution: string;
   };
 }
 
@@ -280,8 +295,10 @@ function getDefaultSiteContent(): SiteContent {
       ],
       founderName: "EL Bonuan",
       founderRole: "Founder · Imagineer",
+      founderImage: "",
       alterEgoName: "Gamotwox",
       alterEgoRole: "The Seeker · Moth Cultist",
+      alterEgoImage: "",
       ethosTitle: "Studio Ethos",
       ethosList: [
         "Finish what matters.",
@@ -296,11 +313,37 @@ function getDefaultSiteContent(): SiteContent {
       subtitle:
         "Want to build something deviant?\nLeave a trace. Light a candle.",
       socialLinks: [
-        { label: "Twitter", href: "https://twitter.com" },
-        { label: "LinkedIn", href: "https://linkedin.com" },
-        { label: "Farcaster", href: "https://warpcast.com" },
-        { label: "Email", href: "mailto:hello@maiba.studio" },
+        { label: "Twitter", href: "https://twitter.com", icon: "" },
+        { label: "LinkedIn", href: "https://linkedin.com", icon: "" },
+        { label: "Farcaster", href: "https://warpcast.com", icon: "" },
+        { label: "Email", href: "mailto:hello@maiba.studio", icon: "" },
       ],
+    },
+    ritual: {
+      title: ":: Maiba Manifesto ::",
+      lines: [
+        "We are the moths who chose the flame.",
+        "Not because we are blind,",
+        "but because we refuse to live in the dark.",
+        "",
+        "Every deviation is an act of devotion.",
+        "Every creation is a prayer we refuse to whisper.",
+        "",
+        "We build what the world did not ask for.",
+        "We make what we would regret not making.",
+        "We follow the light—not because it is safe,",
+        "but because it is ours.",
+        "",
+        "This is the Maiba way.",
+        "Deviant. Sacred. Unfinished.",
+        "",
+        "Burn bright.",
+        "Be moth.",
+        "Seek light.",
+      ],
+      accentLines: ["Burn bright.", "Be moth.", "Seek light."],
+      highlightLines: ["This is the Maiba way."],
+      closingAttribution: "— Fragment I · Written in the dark",
     },
   };
 }

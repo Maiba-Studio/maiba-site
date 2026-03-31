@@ -13,17 +13,17 @@ const fadeUp = {
 interface ContactContent {
   title: string;
   subtitle: string;
-  socialLinks: { label: string; href: string }[];
+  socialLinks: { label: string; href: string; icon: string }[];
 }
 
 const defaults: ContactContent = {
   title: "Join the Cult",
   subtitle: "Want to build something deviant?\nLeave a trace. Light a candle.",
   socialLinks: [
-    { label: "Twitter", href: "https://twitter.com" },
-    { label: "LinkedIn", href: "https://linkedin.com" },
-    { label: "Farcaster", href: "https://warpcast.com" },
-    { label: "Email", href: "mailto:hello@maiba.studio" },
+    { label: "Twitter", href: "https://twitter.com", icon: "" },
+    { label: "LinkedIn", href: "https://linkedin.com", icon: "" },
+    { label: "Farcaster", href: "https://warpcast.com", icon: "" },
+    { label: "Email", href: "mailto:hello@maiba.studio", icon: "" },
   ],
 };
 
@@ -150,8 +150,11 @@ export default function ContactSection() {
                 href={link.href}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-malamaya text-sm hover:text-maiba-red transition-colors duration-300"
+                className="flex items-center gap-2 text-malamaya text-sm hover:text-maiba-red transition-colors duration-300"
               >
+                {link.icon && (
+                  <img src={link.icon} alt="" className="w-4 h-4 rounded-sm object-contain" />
+                )}
                 {link.label}
               </a>
             ))}

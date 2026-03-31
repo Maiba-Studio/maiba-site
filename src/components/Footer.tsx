@@ -10,12 +10,51 @@ const KONAMI = [
   "ArrowLeft", "ArrowRight", "ArrowLeft", "ArrowRight",
 ];
 
+interface RitualPreview {
+  title: string;
+  lines: string[];
+  accentLines: string[];
+  closingAttribution: string;
+}
+
+const defaultRitual: RitualPreview = {
+  title: ":: The Ritual ::",
+  lines: [
+    "We are the moths who chose the flame.",
+    "Not because we are blind,",
+    "but because we refuse to live in the dark.",
+    "",
+    "Every deviation is an act of devotion.",
+    "Every creation is a prayer we refuse to whisper.",
+  ],
+  accentLines: [],
+  closingAttribution: "— Maiba Manifesto, Fragment I",
+};
+
 export default function Footer() {
   const [konamiIndex, setKonamiIndex] = useState(0);
   const [ritualUnlocked, setRitualUnlocked] = useState(false);
   const [secretsRevealed, setSecretsRevealed] = useState(false);
+  const [ritual, setRitual] = useState<RitualPreview>(defaultRitual);
   const footerRef = useRef<HTMLElement>(null);
   const hasReachedBottom = useRef(false);
+
+  useEffect(() => {
+    fetch("/api/site-content")
+      .then((r) => r.json())
+      .then((data) => {
+        if (data.ritual) {
+          const first6 = data.ritual.lines.slice(0, 6);
+          setRitual({
+            title: ":: The Ritual ::",
+            lines: first6,
+            accentLines: data.ritual.accentLines || [],
+            closingAttribution: data.ritual.closingAttribution || defaultRitual.closingAttribution,
+          });
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
@@ -176,15 +215,22 @@ export default function Footer() {
               className="max-w-lg text-center"
             >
               <p className="font-mono text-maiba-red text-xs tracking-widest uppercase mb-8">
-                :: The Ritual ::
+                {ritual.title}
               </p>
               <div className="font-mono text-malamaya-light text-sm leading-8 space-y-4">
-                <p>We are the moths who chose the flame.</p>
-                <p>Not because we are blind,</p>
-                <p>but because we refuse to live in the dark.</p>
-                <p className="text-maiba-red mt-8">Every deviation is an act of devotion.</p>
-                <p>Every creation is a prayer we refuse to whisper.</p>
-                <p className="mt-8 text-malamaya">— Maiba Manifesto, Fragment I</p>
+                {ritual.lines.map((line, i) =>
+                  line === "" ? (
+                    <div key={i} className="h-4" />
+                  ) : (
+                    <p
+                      key={i}
+                      className={ritual.accentLines.includes(line) ? "text-maiba-red" : ""}
+                    >
+                      {line}
+                    </p>
+                  )
+                )}
+                <p className="mt-8 text-malamaya">{ritual.closingAttribution}</p>
               </div>
               <Link
                 href="/ritual"

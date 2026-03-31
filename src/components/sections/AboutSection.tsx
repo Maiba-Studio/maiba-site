@@ -20,8 +20,10 @@ interface AboutContent {
   founderParagraphs: string[];
   founderName: string;
   founderRole: string;
+  founderImage: string;
   alterEgoName: string;
   alterEgoRole: string;
+  alterEgoImage: string;
   ethosTitle: string;
   ethosList: string[];
 }
@@ -46,8 +48,10 @@ const defaults: AboutContent = {
   founderParagraphs: [],
   founderName: "EL Bonuan",
   founderRole: "Founder · Imagineer",
+  founderImage: "",
   alterEgoName: "Gamotwox",
   alterEgoRole: "The Seeker · Moth Cultist",
+  alterEgoImage: "",
   ethosTitle: "Studio Ethos",
   ethosList: [
     "Finish what matters.",
@@ -149,20 +153,34 @@ export default function AboutSection() {
                 className="absolute inset-0 bg-maiba-red/5"
                 animate={{ opacity: showAlterEgo ? 1 : 0 }}
               />
-              <motion.span
-                key={showAlterEgo ? "alter" : "founder"}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="font-display text-2xl md:text-3xl block"
-              >
-                {showAlterEgo ? content.alterEgoName : content.founderName}
-              </motion.span>
-              <span className="text-malamaya text-xs tracking-widest uppercase mt-2 block">
-                {showAlterEgo ? content.alterEgoRole : content.founderRole}
-              </span>
-              <span className="text-malamaya-border text-[10px] tracking-widest uppercase mt-3 block group-hover:text-maiba-red transition-colors">
-                Click to {showAlterEgo ? "return" : "transform"}
-              </span>
+              <div className="flex items-center gap-5">
+                {(showAlterEgo ? content.alterEgoImage : content.founderImage) && (
+                  <motion.img
+                    key={showAlterEgo ? "alter-img" : "founder-img"}
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    src={showAlterEgo ? content.alterEgoImage : content.founderImage}
+                    alt={showAlterEgo ? content.alterEgoName : content.founderName}
+                    className="w-16 h-16 rounded-full object-cover border border-malamaya-border/40 flex-shrink-0"
+                  />
+                )}
+                <div className="text-left">
+                  <motion.span
+                    key={showAlterEgo ? "alter" : "founder"}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="font-display text-2xl md:text-3xl block"
+                  >
+                    {showAlterEgo ? content.alterEgoName : content.founderName}
+                  </motion.span>
+                  <span className="text-malamaya text-xs tracking-widest uppercase mt-2 block">
+                    {showAlterEgo ? content.alterEgoRole : content.founderRole}
+                  </span>
+                  <span className="text-malamaya-border text-[10px] tracking-widest uppercase mt-3 block group-hover:text-maiba-red transition-colors">
+                    Click to {showAlterEgo ? "return" : "transform"}
+                  </span>
+                </div>
+              </div>
             </div>
           </motion.button>
         </motion.div>
