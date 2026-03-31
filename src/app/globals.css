@@ -1,0 +1,128 @@
+@import "tailwindcss";
+
+@theme inline {
+  --color-midnight: #141414;
+  --color-maiba-red: #f23d3d;
+  --color-maiba-red-glow: #f23d3d66;
+  --color-malamaya: #6b6b6b;
+  --color-malamaya-light: #999999;
+  --color-malamaya-border: #2a2a2a;
+  --color-bone: #e8e0d4;
+  --color-foreground: #ededed;
+  --color-background: #141414;
+
+  --font-sans: var(--font-inter);
+  --font-display: var(--font-recoleta);
+  --font-accent: var(--font-playfair);
+  --font-mono: var(--font-geist-mono);
+}
+
+/* Base styles */
+body {
+  background: var(--color-midnight);
+  color: var(--color-foreground);
+  font-family: var(--font-sans), system-ui, sans-serif;
+  overflow-x: hidden;
+}
+
+/* Grain overlay */
+.grain-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  pointer-events: none;
+  opacity: 0.04;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 256px 256px;
+}
+
+/* Vignette on page edges */
+.vignette-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9998;
+  pointer-events: none;
+  background: radial-gradient(ellipse at center, transparent 50%, rgba(0, 0, 0, 0.6) 100%);
+}
+
+/* Moth mode (accessibility grayscale + indigo) */
+.moth-mode {
+  filter: grayscale(0.7) sepia(0.1) hue-rotate(200deg);
+}
+
+/* Flickering animation for candle and accents */
+@keyframes flicker {
+  0%, 100% { opacity: 1; }
+  10% { opacity: 0.8; }
+  20% { opacity: 1; }
+  30% { opacity: 0.6; }
+  50% { opacity: 0.9; }
+  70% { opacity: 0.75; }
+  90% { opacity: 1; }
+}
+
+@keyframes pulse-glow {
+  0%, 100% { opacity: 0.3; transform: scale(1); }
+  50% { opacity: 0.6; transform: scale(1.05); }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  25% { transform: translateY(-8px) rotate(2deg); }
+  75% { transform: translateY(4px) rotate(-1deg); }
+}
+
+@keyframes moth-flutter {
+  0%, 100% { transform: scaleX(1) translateY(0); }
+  15% { transform: scaleX(0.85) translateY(-3px); }
+  30% { transform: scaleX(1) translateY(-5px); }
+  50% { transform: scaleX(0.9) translateY(-2px); }
+  70% { transform: scaleX(1) translateY(-6px); }
+  85% { transform: scaleX(0.88) translateY(-1px); }
+}
+
+/* Selection color */
+::selection {
+  background: var(--color-maiba-red);
+  color: var(--color-midnight);
+}
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--color-midnight);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-malamaya);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-maiba-red);
+}
+
+/* Admin form inputs */
+.admin-input {
+  width: 100%;
+  background: transparent;
+  border: 1px solid var(--color-malamaya-border);
+  border-radius: 2px;
+  padding: 0.625rem 0.875rem;
+  color: var(--color-foreground);
+  font-size: 0.875rem;
+  transition: border-color 0.2s;
+}
+.admin-input:focus {
+  border-color: var(--color-maiba-red);
+  outline: none;
+}
+.admin-input::placeholder {
+  color: color-mix(in srgb, var(--color-malamaya-border) 80%, transparent);
+}
