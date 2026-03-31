@@ -22,7 +22,7 @@ export default function EntriesPage() {
   const [loading, setLoading] = useState(true);
 
   const loadEntries = async () => {
-    const res = await fetch("/api/entries?all=true");
+    const res = await fetch("/api/entries?all=true", { credentials: "include" });
     const data = await res.json();
     setEntries(data);
     setLoading(false);
@@ -34,13 +34,17 @@ export default function EntriesPage() {
 
   const handleDelete = async (id: string) => {
     if (!confirm("Delete this entry permanently?")) return;
-    await fetch(`/api/entries/${id}`, { method: "DELETE" });
+    await fetch(`/api/entries/${id}`, {
+      method: "DELETE",
+      credentials: "include",
+    });
     loadEntries();
   };
 
   const handleTogglePublish = async (entry: FieldNote) => {
     await fetch(`/api/entries/${entry.id}`, {
       method: "PUT",
+      credentials: "include",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ published: !entry.published }),
     });

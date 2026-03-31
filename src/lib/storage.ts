@@ -1,4 +1,4 @@
-import { put, list, del } from "@vercel/blob";
+import { put, head } from "@vercel/blob";
 import fs from "fs/promises";
 import path from "path";
 
@@ -20,10 +20,8 @@ function blobKey(filename: string) {
 export async function readJSON<T>(filename: string, fallback: T): Promise<T> {
   if (IS_VERCEL) {
     try {
-      const blobs = await list({ prefix: blobKey(filename) });
-      const match = blobs.blobs.find((b) => b.pathname === blobKey(filename));
-      if (!match) return fallback;
-      const res = await fetch(match.url, { cache: "no-store" });
+      const meta = await head(blobKey(filename));
+      const res = await fetch(meta.url, { cache: "no-store" });
       if (!res.ok) return fallback;
       return (await res.json()) as T;
     } catch {
@@ -44,15 +42,11 @@ export async function writeJSON<T>(filename: string, data: T): Promise<void> {
   const json = JSON.stringify(data, null, 2);
 
   if (IS_VERCEL) {
-    const blobs = await list({ prefix: blobKey(filename) });
-    const existing = blobs.blobs.find((b) => b.pathname === blobKey(filename));
-    if (existing) {
-      await del(existing.url);
-    }
     await put(blobKey(filename), json, {
       access: "public",
       contentType: "application/json",
       addRandomSuffix: false,
+      allowOverwrite: true,
     });
     return;
   }

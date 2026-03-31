@@ -68,6 +68,7 @@ export default function EntryForm({ entry, onSaved }: Props) {
 
       const res = await fetch(url, {
         method,
+        credentials: "include",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
@@ -166,13 +167,13 @@ export default function EntryForm({ entry, onSaved }: Props) {
         </Field>
 
         {/* Thumbnail */}
-        <Field label="Thumbnail URL" hint="URL to thumbnail image">
+        <Field label="Thumbnail URL" hint="Absolute URL or site path (e.g. /images/...)">
           <input
-            type="url"
+            type="text"
             value={thumbnail}
             onChange={(e) => setThumbnail(e.target.value)}
             className="admin-input"
-            placeholder="https://..."
+            placeholder="https://... or /images/..."
           />
         </Field>
 
