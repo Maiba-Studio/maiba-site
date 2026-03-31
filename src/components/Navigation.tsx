@@ -56,9 +56,13 @@ export default function Navigation() {
       <div className="max-w-7xl mx-auto px-6 py-5 flex items-center justify-between">
         <button
           onClick={() => scrollTo("#home")}
-          className="text-foreground font-display text-xl tracking-wide hover:text-maiba-red transition-colors duration-500"
+          className="hover:opacity-80 transition-opacity duration-500"
         >
-          Maiba
+          <img
+            src="/logo-light.svg"
+            alt="Maiba Studio"
+            className="h-8 w-auto"
+          />
         </button>
 
         {/* Desktop nav */}

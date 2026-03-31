@@ -48,13 +48,10 @@ export default function AdminShell({ children }: { children: ReactNode }) {
     <div className="min-h-screen bg-midnight flex">
       <aside className="w-56 border-r border-malamaya-border/30 flex flex-col flex-shrink-0">
         <div className="px-5 py-6 border-b border-malamaya-border/20">
-          <a
-            href="/"
-            className="font-display text-lg text-foreground hover:text-maiba-red transition-colors"
-          >
-            Maiba
+          <a href="/" className="block hover:opacity-80 transition-opacity">
+            <img src="/logo-light.svg" alt="Maiba Studio" className="h-7 w-auto" />
           </a>
-          <p className="text-[10px] tracking-[0.2em] uppercase text-malamaya mt-1">
+          <p className="text-[10px] tracking-[0.2em] uppercase text-malamaya mt-2">
             Studio Admin
           </p>
         </div>
