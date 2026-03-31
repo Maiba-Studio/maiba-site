@@ -1,8 +1,5 @@
-import fs from "fs/promises";
-import path from "path";
 import { v4 as uuid } from "uuid";
-
-const DATA_DIR = path.join(process.cwd(), "data");
+import { readJSON, writeJSON } from "./storage";
 
 export interface FieldNote {
   id: string;
@@ -79,26 +76,10 @@ export interface LampWord {
   link: string;
 }
 
-async function ensureDataDir() {
-  try {
-    await fs.mkdir(DATA_DIR, { recursive: true });
-  } catch {
-    // already exists
-  }
-}
-
 // --- Field Notes ---
 
-const ENTRIES_FILE = path.join(DATA_DIR, "entries.json");
-
 export async function getEntries(): Promise<FieldNote[]> {
-  await ensureDataDir();
-  try {
-    const raw = await fs.readFile(ENTRIES_FILE, "utf-8");
-    return JSON.parse(raw);
-  } catch {
-    return getDefaultEntries();
-  }
+  return readJSON<FieldNote[]>("entries.json", getDefaultEntries());
 }
 
 export async function getPublishedEntries(): Promise<FieldNote[]> {
@@ -112,8 +93,7 @@ export async function getEntry(id: string): Promise<FieldNote | null> {
 }
 
 export async function saveEntries(entries: FieldNote[]) {
-  await ensureDataDir();
-  await fs.writeFile(ENTRIES_FILE, JSON.stringify(entries, null, 2));
+  await writeJSON("entries.json", entries);
 }
 
 export async function createEntry(
@@ -158,40 +138,22 @@ export async function deleteEntry(id: string): Promise<boolean> {
 
 // --- Site Content ---
 
-const SITE_FILE = path.join(DATA_DIR, "site-content.json");
-
 export async function getSiteContent(): Promise<SiteContent> {
-  await ensureDataDir();
-  try {
-    const raw = await fs.readFile(SITE_FILE, "utf-8");
-    return JSON.parse(raw);
-  } catch {
-    return getDefaultSiteContent();
-  }
+  return readJSON<SiteContent>("site-content.json", getDefaultSiteContent());
 }
 
 export async function saveSiteContent(content: SiteContent) {
-  await ensureDataDir();
-  await fs.writeFile(SITE_FILE, JSON.stringify(content, null, 2));
+  await writeJSON("site-content.json", content);
 }
 
 // --- Users ---
 
-const USERS_FILE = path.join(DATA_DIR, "users.json");
-
 export async function getUsers(): Promise<UserAccount[]> {
-  await ensureDataDir();
-  try {
-    const raw = await fs.readFile(USERS_FILE, "utf-8");
-    return JSON.parse(raw);
-  } catch {
-    return [];
-  }
+  return readJSON<UserAccount[]>("users.json", []);
 }
 
 export async function saveUsers(users: UserAccount[]) {
-  await ensureDataDir();
-  await fs.writeFile(USERS_FILE, JSON.stringify(users, null, 2));
+  await writeJSON("users.json", users);
 }
 
 export async function getUserByUsername(
@@ -242,24 +204,18 @@ export async function deleteUser(id: string): Promise<boolean> {
 
 // --- Lamp Words ---
 
-const LAMP_WORDS_FILE = path.join(DATA_DIR, "lamp-words.json");
-
 export async function getLampWords(): Promise<LampWord[]> {
-  await ensureDataDir();
-  try {
-    const raw = await fs.readFile(LAMP_WORDS_FILE, "utf-8");
-    return JSON.parse(raw);
-  } catch {
-    return [];
-  }
+  return readJSON<LampWord[]>("lamp-words.json", []);
 }
 
 export async function saveLampWords(words: LampWord[]) {
-  await ensureDataDir();
-  await fs.writeFile(LAMP_WORDS_FILE, JSON.stringify(words, null, 2));
+  await writeJSON("lamp-words.json", words);
 }
 
-export async function createLampWord(word: string, link: string): Promise<LampWord> {
+export async function createLampWord(
+  word: string,
+  link: string
+): Promise<LampWord> {
   const words = await getLampWords();
   const entry: LampWord = { id: uuid(), word, link };
   words.push(entry);
