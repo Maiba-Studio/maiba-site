@@ -7,6 +7,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ valid: false }, { status: 400 });
   }
 
-  const valid = await verifyLampPassword(password);
-  return NextResponse.json({ valid });
+  const result = await verifyLampPassword(password);
+  return NextResponse.json(result);
 }

@@ -2,9 +2,9 @@
 
 import { useEffect, useState, FormEvent } from "react";
 import AdminShell from "@/components/admin/AdminShell";
-import type { SiteContent, SocialLink } from "@/lib/data";
+import type { SiteContent, SocialLink, LampWord } from "@/lib/data";
 
-type Tab = "hero" | "about" | "contact" | "ritual";
+type Tab = "hero" | "about" | "contact" | "ritual" | "lamp";
 
 const defaultRitual: SiteContent["ritual"] = {
   title: ":: Maiba Manifesto ::",
@@ -39,6 +39,13 @@ export default function SiteContentPage() {
   const [saved, setSaved] = useState(false);
   const [activeTab, setActiveTab] = useState<Tab>("hero");
 
+  // Lamp words state
+  const [lampWords, setLampWords] = useState<LampWord[]>([]);
+  const [newWord, setNewWord] = useState("");
+  const [newLink, setNewLink] = useState("");
+  const [lampMsg, setLampMsg] = useState<{ type: "ok" | "err"; text: string } | null>(null);
+  const [lampSaving, setLampSaving] = useState(false);
+
   useEffect(() => {
     fetch("/api/site-content")
       .then((r) => r.json())
@@ -60,7 +67,61 @@ export default function SiteContentPage() {
           ritual: data.ritual ?? defaultRitual,
         } as SiteContent);
       });
+
+    fetch("/api/lamp-words")
+      .then((r) => r.json())
+      .then((data) => {
+        if (Array.isArray(data)) setLampWords(data);
+      })
+      .catch(() => {});
   }, []);
+
+  const addLampWord = async (e: FormEvent) => {
+    e.preventDefault();
+    if (!newWord.trim() || !newLink.trim()) return;
+    setLampSaving(true);
+    setLampMsg(null);
+    try {
+      const res = await fetch("/api/lamp-words", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ word: newWord.trim(), link: newLink.trim() }),
+      });
+      if (res.ok) {
+        const entry = await res.json();
+        setLampWords([...lampWords, entry]);
+        setNewWord("");
+        setNewLink("");
+        setLampMsg({ type: "ok", text: "Lamp word added." });
+        setTimeout(() => setLampMsg(null), 3000);
+      }
+    } catch {
+      setLampMsg({ type: "err", text: "Failed to add." });
+    } finally {
+      setLampSaving(false);
+    }
+  };
+
+  const deleteLampWord = async (id: string) => {
+    const res = await fetch(`/api/lamp-words/${id}`, { method: "DELETE" });
+    if (res.ok) setLampWords(lampWords.filter((w) => w.id !== id));
+  };
+
+  const updateLampWordField = async (
+    id: string,
+    field: "word" | "link",
+    value: string
+  ) => {
+    setLampWords(lampWords.map((w) => (w.id === id ? { ...w, [field]: value } : w)));
+  };
+
+  const saveLampWord = async (lw: LampWord) => {
+    await fetch(`/api/lamp-words/${lw.id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ word: lw.word, link: lw.link }),
+    });
+  };
 
   const handleSave = async (e: FormEvent) => {
     e.preventDefault();
@@ -92,6 +153,7 @@ export default function SiteContentPage() {
     { id: "about", label: "About" },
     { id: "contact", label: "Contact" },
     { id: "ritual", label: "Ritual" },
+    { id: "lamp", label: "Lamp" },
   ];
 
   const updateAbout = (patch: Partial<SiteContent["about"]>) =>
@@ -332,19 +394,123 @@ export default function SiteContentPage() {
           </>
         )}
 
-        <div className="flex items-center gap-4 pt-2">
-          <button
-            type="submit"
-            disabled={saving}
-            className="bg-maiba-red/10 border border-maiba-red/30 text-maiba-red px-6 py-3 rounded-sm hover:bg-maiba-red/20 transition-colors text-sm tracking-widest uppercase disabled:opacity-50"
-          >
-            {saving ? "Saving..." : "Save Changes"}
-          </button>
-          {saved && (
-            <span className="text-emerald-400 text-sm">Saved!</span>
+        {/* ── Save (for hero/about/contact/ritual) ── */}
+        {activeTab !== "lamp" && (
+          <div className="flex items-center gap-4 pt-2">
+            <button
+              type="submit"
+              disabled={saving}
+              className="bg-maiba-red/10 border border-maiba-red/30 text-maiba-red px-6 py-3 rounded-sm hover:bg-maiba-red/20 transition-colors text-sm tracking-widest uppercase disabled:opacity-50"
+            >
+              {saving ? "Saving..." : "Save Changes"}
+            </button>
+            {saved && (
+              <span className="text-emerald-400 text-sm">Saved!</span>
+            )}
+          </div>
+        )}
+      </form>
+
+      {/* ── Lamp Words (outside form — has its own save logic) ── */}
+      {activeTab === "lamp" && (
+        <div className="max-w-2xl space-y-6">
+          <p className="text-malamaya text-sm">
+            Add secret words for the Lamp. When a visitor types a matching word, they will be redirected to the linked URL instead of getting a random quote.
+          </p>
+          <p className="text-malamaya-border text-xs">
+            The original admin password (from environment) still works as before and leads to the admin login.
+          </p>
+
+          {/* Add new */}
+          <form onSubmit={addLampWord} className="border border-malamaya-border/20 rounded-sm p-5 space-y-4">
+            <p className="text-xs tracking-widest uppercase text-malamaya-light">
+              Add New Lamp Word
+            </p>
+            <div className="grid grid-cols-2 gap-4">
+              <Field label="Secret Word">
+                <input
+                  type="text"
+                  value={newWord}
+                  onChange={(e) => setNewWord(e.target.value)}
+                  className="admin-input"
+                  placeholder="The passphrase..."
+                />
+              </Field>
+              <Field label="Redirect Link">
+                <input
+                  type="text"
+                  value={newLink}
+                  onChange={(e) => setNewLink(e.target.value)}
+                  className="admin-input"
+                  placeholder="https://... or /path"
+                />
+              </Field>
+            </div>
+
+            {lampMsg && (
+              <p className={`text-sm ${lampMsg.type === "ok" ? "text-emerald-400" : "text-maiba-red"}`}>
+                {lampMsg.text}
+              </p>
+            )}
+
+            <button
+              type="submit"
+              disabled={lampSaving}
+              className="bg-maiba-red/10 border border-maiba-red/30 text-maiba-red px-6 py-3 rounded-sm hover:bg-maiba-red/20 transition-colors text-sm tracking-widest uppercase disabled:opacity-50"
+            >
+              {lampSaving ? "Adding..." : "+ Add Word"}
+            </button>
+          </form>
+
+          {/* List existing */}
+          {lampWords.length > 0 && (
+            <div>
+              <p className="text-xs tracking-widest uppercase text-malamaya-light mb-3">
+                Active Lamp Words ({lampWords.length})
+              </p>
+              <div className="space-y-2">
+                {lampWords.map((lw) => (
+                  <div
+                    key={lw.id}
+                    className="border border-malamaya-border/20 rounded-sm p-4"
+                  >
+                    <div className="grid grid-cols-2 gap-3 mb-3">
+                      <Field label="Word">
+                        <input
+                          type="text"
+                          value={lw.word}
+                          onChange={(e) =>
+                            updateLampWordField(lw.id, "word", e.target.value)
+                          }
+                          onBlur={() => saveLampWord(lw)}
+                          className="admin-input"
+                        />
+                      </Field>
+                      <Field label="Link">
+                        <input
+                          type="text"
+                          value={lw.link}
+                          onChange={(e) =>
+                            updateLampWordField(lw.id, "link", e.target.value)
+                          }
+                          onBlur={() => saveLampWord(lw)}
+                          className="admin-input"
+                        />
+                      </Field>
+                    </div>
+                    <button
+                      onClick={() => deleteLampWord(lw.id)}
+                      className="text-[10px] text-maiba-red/60 hover:text-maiba-red tracking-widest uppercase transition-colors"
+                    >
+                      Remove
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
           )}
         </div>
-      </form>
+      )}
     </AdminShell>
   );
 }

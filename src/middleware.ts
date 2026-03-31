@@ -1,8 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { jwtVerify } from "jose";
 
+const ADMIN_ONLY_PATHS = ["/admin/site", "/admin/accounts"];
+
 export async function middleware(req: NextRequest) {
-  if (req.nextUrl.pathname.startsWith("/admin") && req.nextUrl.pathname !== "/admin/login") {
+  const { pathname } = req.nextUrl;
+
+  if (pathname.startsWith("/admin") && pathname !== "/admin/login") {
     const token = req.cookies.get("maiba-session")?.value;
 
     if (!token) {
@@ -11,7 +15,16 @@ export async function middleware(req: NextRequest) {
 
     try {
       const secret = new TextEncoder().encode(process.env.JWT_SECRET);
-      await jwtVerify(token, secret);
+      const { payload } = await jwtVerify(token, secret);
+      const role = (payload.role as string) || "admin";
+
+      if (
+        role === "moderator" &&
+        ADMIN_ONLY_PATHS.some((p) => pathname.startsWith(p))
+      ) {
+        return NextResponse.redirect(new URL("/admin", req.url));
+      }
+
       return NextResponse.next();
     } catch {
       return NextResponse.redirect(new URL("/admin/login", req.url));

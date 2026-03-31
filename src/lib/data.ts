@@ -63,6 +63,22 @@ export interface SiteContent {
   };
 }
 
+export type UserRole = "admin" | "moderator";
+
+export interface UserAccount {
+  id: string;
+  username: string;
+  passwordHash: string;
+  role: UserRole;
+  createdAt: string;
+}
+
+export interface LampWord {
+  id: string;
+  word: string;
+  link: string;
+}
+
 async function ensureDataDir() {
   try {
     await fs.mkdir(DATA_DIR, { recursive: true });
@@ -157,6 +173,118 @@ export async function getSiteContent(): Promise<SiteContent> {
 export async function saveSiteContent(content: SiteContent) {
   await ensureDataDir();
   await fs.writeFile(SITE_FILE, JSON.stringify(content, null, 2));
+}
+
+// --- Users ---
+
+const USERS_FILE = path.join(DATA_DIR, "users.json");
+
+export async function getUsers(): Promise<UserAccount[]> {
+  await ensureDataDir();
+  try {
+    const raw = await fs.readFile(USERS_FILE, "utf-8");
+    return JSON.parse(raw);
+  } catch {
+    return [];
+  }
+}
+
+export async function saveUsers(users: UserAccount[]) {
+  await ensureDataDir();
+  await fs.writeFile(USERS_FILE, JSON.stringify(users, null, 2));
+}
+
+export async function getUserByUsername(
+  username: string
+): Promise<UserAccount | null> {
+  const users = await getUsers();
+  return users.find((u) => u.username === username) ?? null;
+}
+
+export async function getUserById(id: string): Promise<UserAccount | null> {
+  const users = await getUsers();
+  return users.find((u) => u.id === id) ?? null;
+}
+
+export async function createUser(
+  data: Omit<UserAccount, "id" | "createdAt">
+): Promise<UserAccount> {
+  const users = await getUsers();
+  const user: UserAccount = {
+    ...data,
+    id: uuid(),
+    createdAt: new Date().toISOString(),
+  };
+  users.push(user);
+  await saveUsers(users);
+  return user;
+}
+
+export async function updateUser(
+  id: string,
+  data: Partial<Omit<UserAccount, "id" | "createdAt">>
+): Promise<UserAccount | null> {
+  const users = await getUsers();
+  const idx = users.findIndex((u) => u.id === id);
+  if (idx === -1) return null;
+  users[idx] = { ...users[idx], ...data };
+  await saveUsers(users);
+  return users[idx];
+}
+
+export async function deleteUser(id: string): Promise<boolean> {
+  const users = await getUsers();
+  const filtered = users.filter((u) => u.id !== id);
+  if (filtered.length === users.length) return false;
+  await saveUsers(filtered);
+  return true;
+}
+
+// --- Lamp Words ---
+
+const LAMP_WORDS_FILE = path.join(DATA_DIR, "lamp-words.json");
+
+export async function getLampWords(): Promise<LampWord[]> {
+  await ensureDataDir();
+  try {
+    const raw = await fs.readFile(LAMP_WORDS_FILE, "utf-8");
+    return JSON.parse(raw);
+  } catch {
+    return [];
+  }
+}
+
+export async function saveLampWords(words: LampWord[]) {
+  await ensureDataDir();
+  await fs.writeFile(LAMP_WORDS_FILE, JSON.stringify(words, null, 2));
+}
+
+export async function createLampWord(word: string, link: string): Promise<LampWord> {
+  const words = await getLampWords();
+  const entry: LampWord = { id: uuid(), word, link };
+  words.push(entry);
+  await saveLampWords(words);
+  return entry;
+}
+
+export async function updateLampWord(
+  id: string,
+  data: Partial<Omit<LampWord, "id">>
+): Promise<LampWord | null> {
+  const words = await getLampWords();
+  const idx = words.findIndex((w) => w.id === id);
+  if (idx === -1) return null;
+  words[idx] = { ...words[idx], ...data };
+  await saveLampWords(words);
+  return words[idx];
+}
+
+export async function deleteLampWord(id: string): Promise<boolean> {
+  const words = await getLampWords();
+  const filtered = words.filter((w) => w.id !== id);
+  if (filtered.length === words.length) return false;
+  await saveLampWords(filtered);
+  return true;
 }
 
 // --- Defaults ---

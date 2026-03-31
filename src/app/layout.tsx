@@ -1,10 +1,7 @@
 import type { Metadata } from "next";
 import { Inter, Playfair_Display, DM_Serif_Display } from "next/font/google";
 import "./globals.css";
-import Navigation from "@/components/Navigation";
-import Footer from "@/components/Footer";
-import GrainOverlay from "@/components/GrainOverlay";
-import CursorTrail from "@/components/CursorTrail";
+import SiteChrome from "@/components/SiteChrome";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -49,11 +46,7 @@ export default function RootLayout({
       className={`${inter.variable} ${playfair.variable} ${displayFont.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-midnight text-foreground">
-        <GrainOverlay />
-        <CursorTrail />
-        <Navigation />
-        <main className="flex-1">{children}</main>
-        <Footer />
+        <SiteChrome>{children}</SiteChrome>
       </body>
     </html>
   );

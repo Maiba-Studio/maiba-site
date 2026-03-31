@@ -48,12 +48,17 @@ export default function Lamp() {
       });
       const data = await res.json();
 
-      if (data.valid) {
+      if (data.valid && data.link) {
         setIsAdmin(true);
         setResponse("The light recognizes you. Welcome home, keeper.");
         setInput("");
         setTimeout(() => {
-          router.push("/admin/login");
+          const link = data.link as string;
+          if (link.startsWith("http://") || link.startsWith("https://")) {
+            window.location.href = link;
+          } else {
+            router.push(link);
+          }
         }, 2000);
       } else {
         setIsAdmin(false);

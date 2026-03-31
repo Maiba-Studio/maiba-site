@@ -1,9 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import {
-  verifyAdminCredentials,
-  createSession,
-  setSessionCookie,
-} from "@/lib/auth";
+import { verifyCredentials, createSession, setSessionCookie } from "@/lib/auth";
 
 export async function POST(req: NextRequest) {
   const { username, password } = await req.json();
@@ -15,12 +11,15 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const valid = await verifyAdminCredentials(username, password);
-  if (!valid) {
-    return NextResponse.json({ error: "Invalid credentials" }, { status: 401 });
+  const result = await verifyCredentials(username, password);
+  if (!result.valid || !result.role || !result.userId) {
+    return NextResponse.json(
+      { error: "Invalid credentials" },
+      { status: 401 }
+    );
   }
 
-  const token = await createSession();
+  const token = await createSession(result.role, result.userId, username);
   await setSessionCookie(token);
-  return NextResponse.json({ success: true });
+  return NextResponse.json({ success: true, role: result.role });
 }
