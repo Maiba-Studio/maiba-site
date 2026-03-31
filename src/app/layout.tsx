@@ -63,7 +63,7 @@ export const metadata: Metadata = {
       "A cultural deviant creative studio working across art, AI, Web3, and interior space. Founded by EL Bonuan.",
     images: [
       {
-        url: "/images/og-image-placeholder.svg",
+        url: "/images/og-image-placeholder.png",
         width: 1200,
         height: 630,
         alt: "Maiba Studio — Deviant Made. Culture-coded. Artist-led.",
@@ -75,7 +75,7 @@ export const metadata: Metadata = {
     title: "Maiba Studio — Deviant Made. Culture-coded. Artist-led.",
     description:
       "A cultural deviant creative studio working across art, AI, Web3, and interior space.",
-    images: ["/images/og-image-placeholder.svg"],
+    images: ["/images/og-image-placeholder.png"],
   },
   icons: {
     icon: [

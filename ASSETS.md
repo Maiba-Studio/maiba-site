@@ -70,11 +70,11 @@ apple: "/apple-touch-icon.png",
 
 | Property | Value |
 |----------|-------|
-| **Placeholder** | `public/images/og-image-placeholder.svg` |
+| **Placeholder** | `public/images/og-image-placeholder.png` |
+| **Format** | PNG (1200×630px) |
 | **Referenced in** | `src/app/layout.tsx` → `metadata.openGraph.images` and `metadata.twitter.images` |
-| **Recommended format** | PNG or JPG |
 | **Required dimensions** | **1200×630px** (OG standard) |
-| **Filename for production** | `public/images/og-image.png` (update path in layout.tsx) |
+| **Filename for production** | `public/images/og-image.png` (then update path in layout.tsx) |
 | **SEO note** | This is the preview image shown when your site is shared on Twitter/X, Facebook, LinkedIn, Discord, iMessage, etc. It is a **critical ranking signal** for social SEO. |
 
 **Design tips for OG image:**
@@ -85,7 +85,7 @@ apple: "/apple-touch-icon.png",
 - Keep key content in the center 60% (edges get cropped on some platforms)
 - Avoid small text — test at 600×315px (half-size preview)
 
-**When replacing:** update both paths in `src/app/layout.tsx`:
+**When replacing:** rename/replace the file and update both paths in `src/app/layout.tsx`:
 ```ts
 openGraph: { images: [{ url: "/images/og-image.png", ... }] },
 twitter: { images: ["/images/og-image.png"] },
@@ -99,30 +99,33 @@ twitter: { images: ["/images/og-image.png"] },
 
 | Property | Value |
 |----------|-------|
-| **Placeholder** | `public/images/founder-placeholder.svg` |
-| **Default value in** | `src/lib/data.ts` → `about.founderImage` |
+| **Placeholder** | `public/images/founder-placeholder.png` |
+| **Format** | PNG (400×400px, dark gray solid) |
+| **Default value in** | `src/lib/data.ts` → `about.founderImage` → `"/images/founder-placeholder.png"` |
 | **Editable via** | Admin Dashboard → Site Content → About → Founder → Profile Picture URL |
-| **Recommended format** | JPG or WebP |
-| **Recommended dimensions** | **400×400px** (displayed as 64px circle, needs 2× for retina) |
+| **Recommended replacement format** | JPG or WebP (smaller file size for photos) |
+| **Recommended dimensions** | **400×400px** (displayed as 112–144px circle, needs 2–3× for retina) |
 | **Alt text (SEO)** | `"EL Bonuan — Founder and Imagineer of Maiba Studio"` |
 | **SEO note** | Profile photos help with E-E-A-T (Experience, Expertise, Authoritativeness, Trustworthiness) — a key Google ranking factor. Photos of real people build trust and improve engagement. |
 
 **Tips:**
 - Use a professional headshot or artistic portrait that matches the Maiba aesthetic
-- Square crop with the face centered (displayed as a circle)
+- Square crop with the face centered (displayed as a circle on the character card)
 - Optimize to under 100KB for fast loading
+- To replace: either swap the file at `public/images/founder-placeholder.png`, or upload to a host and set the URL in the admin dashboard
 
 ### 7. Alter Ego Photo
 
 | Property | Value |
 |----------|-------|
-| **Placeholder** | `public/images/alter-ego-placeholder.svg` |
-| **Default value in** | `src/lib/data.ts` → `about.alterEgoImage` |
+| **Placeholder** | `public/images/alter-ego-placeholder.png` |
+| **Format** | PNG (400×400px, dark gray solid) |
+| **Default value in** | `src/lib/data.ts` → `about.alterEgoImage` → `"/images/alter-ego-placeholder.png"` |
 | **Editable via** | Admin Dashboard → Site Content → About → Alter Ego → Profile Picture URL |
-| **Recommended format** | JPG, WebP, or PNG (with transparency for artistic effect) |
+| **Recommended replacement format** | JPG, WebP, or PNG (with transparency for artistic effect) |
 | **Recommended dimensions** | **400×400px** |
 | **Alt text (SEO)** | `"Gamotwox — The Seeker, Moth Cultist alter ego"` |
-| **Notes** | This can be more stylized/artistic than the founder photo — an avatar, illustration, or masked photo. |
+| **Notes** | This can be more stylized/artistic than the founder photo — an avatar, illustration, or masked photo. Displayed as a circle on the character card alongside the name and title. |
 
 ---
 
@@ -132,10 +135,11 @@ twitter: { images: ["/images/og-image.png"] },
 
 | Property | Value |
 |----------|-------|
-| **Placeholder** | `public/images/thumbnail-placeholder.svg` |
-| **Default value in** | `src/lib/data.ts` → default entries `thumbnail` field |
+| **Placeholder** | `public/images/thumbnail-placeholder.png` |
+| **Format** | PNG (600×400px, dark gray solid) |
+| **Default value in** | `src/lib/data.ts` → default entries `thumbnail` → `"/images/thumbnail-placeholder.png"` |
 | **Editable via** | Admin Dashboard → Field Notes → Thumbnail URL |
-| **Recommended format** | JPG or WebP |
+| **Recommended replacement format** | JPG or WebP |
 | **Recommended dimensions** | **600×400px** (3:2 ratio) |
 | **Alt text (SEO)** | Use the entry title, e.g. `"Moth Wing Studies — Ink on Paper"` |
 | **SEO note** | Thumbnails appear in the carousel and on individual field note pages. Use descriptive filenames: `moth-wing-studies-ink.jpg` (not `IMG_2847.jpg`). Descriptive filenames are a minor but real SEO signal. |
@@ -165,11 +169,12 @@ twitter: { images: ["/images/og-image.png"] },
 
 | Property | Value |
 |----------|-------|
-| **Placeholder** | `public/images/social-icon-placeholder.svg` |
+| **Placeholder** | `public/images/social-icon-placeholder.png` |
+| **Format** | PNG (32×32px, dark gray solid) |
 | **Editable via** | Admin Dashboard → Site Content → Contact → Social Links → Icon URL |
-| **Recommended format** | SVG (preferred) or PNG with transparency |
+| **Recommended replacement format** | SVG (preferred for scaling) or PNG with transparency |
 | **Recommended dimensions** | **32×32px** (displayed at 16px, needs 2× for retina) |
-| **Notes** | These appear next to social link labels in the Contact section. Use official brand icons or a consistent monochrome icon set. SVG is recommended for perfect scaling. |
+| **Notes** | These appear next to social link labels in the Contact section. Use official brand icons or a consistent monochrome icon set. |
 
 **Suggested icon sources:**
 - [Simple Icons](https://simpleicons.org) — SVG brand icons (free)
@@ -202,7 +207,7 @@ Use this checklist when replacing placeholder assets to maximize search ranking:
 
 - [ ] **Robots** — `index: true, follow: true` is set for the public site. Admin pages are `noindex`.
 - [ ] **Sitemap** — Generate via Next.js `sitemap.ts` (not yet created — consider adding)
-- [ ] **robots.txt** — Not yet created. Add `public/robots.txt` with sitemap URL.
+- [x] **robots.txt** — Created at `public/robots.txt`. Blocks `/admin/` and `/api/`, points to sitemap.
 - [ ] **Performance** — Run Lighthouse audit. Target 90+ on Performance, Accessibility, Best Practices, SEO.
 - [ ] **Mobile** — Site is responsive. Test with Google Mobile-Friendly Test.
 
@@ -238,17 +243,18 @@ Ensure each page has exactly one H1. Field note detail pages should use the entr
 
 ```
 public/
-├── logo.svg                        ← Full horizontal logo (dark bg)
-├── logo-light.svg                  ← Full horizontal logo (transparent, for nav)
-├── logo-icon.svg                   ← Square icon/monogram
-├── favicon.svg                     ← Browser tab icon (32×32)
-├── apple-touch-icon.svg            ← iOS home screen icon (180×180) → replace with .png
+├── logo.svg                        ← Full horizontal logo (dark bg) — SVG
+├── logo-light.svg                  ← Full horizontal logo (transparent, for nav) — SVG
+├── logo-icon.svg                   ← Square icon/monogram — SVG
+├── favicon.svg                     ← Browser tab icon (32×32) — SVG
+├── apple-touch-icon.svg            ← iOS home screen icon (180×180) — SVG, replace with .png
+├── robots.txt                      ← Search engine crawler rules
 └── images/
-    ├── og-image-placeholder.svg    ← Social share preview (1200×630) → replace with .png
-    ├── founder-placeholder.svg     ← Founder profile (400×400) → replace with .jpg
-    ├── alter-ego-placeholder.svg   ← Alter ego profile (400×400) → replace with .jpg
-    ├── thumbnail-placeholder.svg   ← Field note thumbnail (600×400) → replace with .jpg
-    └── social-icon-placeholder.svg ← Social link icon (32×32) → replace with .svg
+    ├── og-image-placeholder.png    ← Social share preview (1200×630) — PNG
+    ├── founder-placeholder.png     ← Founder profile (400×400) — PNG
+    ├── alter-ego-placeholder.png   ← Alter ego profile (400×400) — PNG
+    ├── thumbnail-placeholder.png   ← Field note thumbnail (600×400) — PNG
+    └── social-icon-placeholder.png ← Social link icon (32×32) — PNG
 ```
 
 ---
@@ -256,7 +262,7 @@ public/
 ## Quick Replacement Steps
 
 1. Export your final assets at the recommended dimensions and format
-2. Drop them into `public/` or `public/images/` with the same filename (or a new descriptive name)
+2. Drop them into `public/` or `public/images/`, replacing the existing PNG placeholders with the same filename
 3. If using a different filename, update the reference:
    - **Logo**: `src/components/Navigation.tsx` and `src/components/admin/AdminShell.tsx`
    - **Favicon/Apple icon**: `src/app/layout.tsx` → `metadata.icons`
@@ -264,6 +270,5 @@ public/
    - **Founder/Alter ego photos**: Admin Dashboard → Site Content → About (or `src/lib/data.ts` defaults)
    - **Thumbnails**: Admin Dashboard → Field Notes → each entry's Thumbnail URL
    - **Social icons**: Admin Dashboard → Site Content → Contact → each link's Icon URL
-4. Delete the old placeholder SVG files
-5. Run `npx next build` to verify no broken references
-6. Run a Lighthouse audit to confirm SEO scores
+4. Run `npx next build` to verify no broken references
+5. Run a Lighthouse audit to confirm SEO scores

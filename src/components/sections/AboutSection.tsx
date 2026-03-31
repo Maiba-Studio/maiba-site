@@ -125,64 +125,94 @@ export default function AboutSection() {
       {/* The Founder */}
       <div className="max-w-3xl mx-auto px-6 mb-32">
         <motion.div {...fadeUp}>
-          <p className="text-maiba-red text-xs tracking-[0.3em] uppercase mb-8">
+          <p className="text-maiba-red text-xs tracking-[0.3em] uppercase mb-10">
             {content.founderTitle}
           </p>
-          <div className="space-y-6 text-malamaya-light text-base md:text-lg leading-relaxed">
-            <p>
-              <strong className="text-foreground">{content.founderName}</strong>{" "}
-              is the founder and imagineer of Maiba Studio. A cultural deviant
-              working across art, AI, Web3, and interior space, he builds at
-              the bleeding edge of creative technology.
-            </p>
-            <p>
-              His alter ego,{" "}
-              <strong className="text-foreground">{content.alterEgoName}</strong>,
-              is the seeker—a moth cultist following light through shadow.
-            </p>
-          </div>
 
+          {/* Character card — photo, name, title */}
           <motion.button
             onClick={() => setShowAlterEgo(!showAlterEgo)}
-            className="mt-10 group relative"
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
+            className="w-full mb-10 group relative"
+            whileHover={{ scale: 1.01 }}
+            whileTap={{ scale: 0.99 }}
           >
-            <div className="border border-malamaya-border px-8 py-6 rounded-sm relative overflow-hidden">
+            <div className="border border-malamaya-border rounded-sm relative overflow-hidden py-8 px-6">
               <motion.div
                 className="absolute inset-0 bg-maiba-red/5"
                 animate={{ opacity: showAlterEgo ? 1 : 0 }}
               />
-              <div className="flex items-center gap-5">
-                {(showAlterEgo ? content.alterEgoImage : content.founderImage) && (
-                  <motion.img
-                    key={showAlterEgo ? "alter-img" : "founder-img"}
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    src={showAlterEgo ? content.alterEgoImage : content.founderImage}
-                    alt={showAlterEgo ? content.alterEgoName : content.founderName}
-                    className="w-16 h-16 rounded-full object-cover border border-malamaya-border/40 flex-shrink-0"
+              <div className="relative z-10 flex flex-col items-center text-center gap-4">
+                <div className="relative">
+                  {(showAlterEgo ? content.alterEgoImage : content.founderImage) && (
+                    <motion.img
+                      key={showAlterEgo ? "alter-img" : "founder-img"}
+                      initial={{ opacity: 0, scale: 0.9 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ duration: 0.4 }}
+                      src={showAlterEgo ? content.alterEgoImage : content.founderImage}
+                      alt={
+                        showAlterEgo
+                          ? `${content.alterEgoName} — ${content.alterEgoRole}`
+                          : `${content.founderName} — ${content.founderRole}`
+                      }
+                      className="w-28 h-28 md:w-36 md:h-36 rounded-full object-cover border-2 border-malamaya-border/40"
+                    />
+                  )}
+                  <motion.div
+                    className="absolute -inset-2 rounded-full border border-maiba-red/20"
+                    animate={{ opacity: showAlterEgo ? 0.6 : 0, scale: showAlterEgo ? 1 : 0.95 }}
+                    transition={{ duration: 0.4 }}
                   />
-                )}
-                <div className="text-left">
-                  <motion.span
-                    key={showAlterEgo ? "alter" : "founder"}
-                    initial={{ opacity: 0, y: 10 }}
+                </div>
+                <div>
+                  <motion.h3
+                    key={showAlterEgo ? "alter-name" : "founder-name"}
+                    initial={{ opacity: 0, y: 8 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="font-display text-2xl md:text-3xl block"
+                    transition={{ duration: 0.3 }}
+                    className="font-display text-2xl md:text-3xl"
                   >
                     {showAlterEgo ? content.alterEgoName : content.founderName}
-                  </motion.span>
-                  <span className="text-malamaya text-xs tracking-widest uppercase mt-2 block">
+                  </motion.h3>
+                  <motion.p
+                    key={showAlterEgo ? "alter-role" : "founder-role"}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ duration: 0.3, delay: 0.1 }}
+                    className="text-malamaya text-xs tracking-widest uppercase mt-2"
+                  >
                     {showAlterEgo ? content.alterEgoRole : content.founderRole}
-                  </span>
-                  <span className="text-malamaya-border text-[10px] tracking-widest uppercase mt-3 block group-hover:text-maiba-red transition-colors">
-                    Click to {showAlterEgo ? "return" : "transform"}
-                  </span>
+                  </motion.p>
                 </div>
+                <span className="text-malamaya-border text-[10px] tracking-widest uppercase mt-1 group-hover:text-maiba-red transition-colors">
+                  Click to {showAlterEgo ? "return" : "transform"}
+                </span>
               </div>
             </div>
           </motion.button>
+
+          {/* Bio text */}
+          <div className="space-y-6 text-malamaya-light text-base md:text-lg leading-relaxed">
+            {content.founderParagraphs.length > 0 ? (
+              content.founderParagraphs.map((para, i) => (
+                <p key={i}>{para}</p>
+              ))
+            ) : (
+              <>
+                <p>
+                  <strong className="text-foreground">{content.founderName}</strong>{" "}
+                  is the founder and imagineer of Maiba Studio. A cultural deviant
+                  working across art, AI, Web3, and interior space, he builds at
+                  the bleeding edge of creative technology.
+                </p>
+                <p>
+                  His alter ego,{" "}
+                  <strong className="text-foreground">{content.alterEgoName}</strong>,
+                  is the seeker—a moth cultist following light through shadow.
+                </p>
+              </>
+            )}
+          </div>
         </motion.div>
       </div>
 
