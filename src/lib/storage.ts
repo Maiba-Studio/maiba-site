@@ -1,4 +1,4 @@
-import { put, head, del, list } from "@vercel/blob";
+import { put, del, list, get } from "@vercel/blob";
 import fs from "fs/promises";
 import path from "path";
 
@@ -20,10 +20,10 @@ function blobKey(filename: string) {
 export async function readJSON<T>(filename: string, fallback: T): Promise<T> {
   if (IS_VERCEL) {
     try {
-      const meta = await head(blobKey(filename));
-      const res = await fetch(meta.url, { cache: "no-store" });
-      if (!res.ok) return fallback;
-      return (await res.json()) as T;
+      const result = await get(blobKey(filename), { access: "private" });
+      if (!result) return fallback;
+      const response = new Response(result.stream);
+      return (await response.json()) as T;
     } catch {
       return fallback;
     }
@@ -54,7 +54,7 @@ export async function writeJSON<T>(filename: string, data: T): Promise<void> {
     }
 
     await put(key, json, {
-      access: "public",
+      access: "private",
       contentType: "application/json",
       addRandomSuffix: false,
     });
