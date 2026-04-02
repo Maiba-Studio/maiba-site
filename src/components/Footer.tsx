@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import Lamp from "./Lamp";
+import { X, AtSign, Briefcase, Radio } from "lucide-react";
 
 const KONAMI = [
   "ArrowUp", "ArrowUp", "ArrowDown", "ArrowDown",
@@ -141,9 +142,18 @@ export default function Footer() {
             &copy; {new Date().getFullYear()} Maiba Studio. Deviant Made.
           </div>
           <div className="flex items-center gap-6 text-malamaya text-sm">
-            <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" className="hover:text-maiba-red transition-colors">Twitter</a>
-            <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" className="hover:text-maiba-red transition-colors">LinkedIn</a>
-            <a href="https://warpcast.com" target="_blank" rel="noopener noreferrer" className="hover:text-maiba-red transition-colors">Farcaster</a>
+            <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 hover:text-maiba-red transition-colors">
+              <AtSign className="w-4 h-4" strokeWidth={1.5} />
+              <span>Twitter</span>
+            </a>
+            <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 hover:text-maiba-red transition-colors">
+              <Briefcase className="w-4 h-4" strokeWidth={1.5} />
+              <span>LinkedIn</span>
+            </a>
+            <a href="https://warpcast.com" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 hover:text-maiba-red transition-colors">
+              <Radio className="w-4 h-4" strokeWidth={1.5} />
+              <span>Farcaster</span>
+            </a>
           </div>
         </div>
       </div>
@@ -206,7 +216,8 @@ export default function Footer() {
               onClick={() => setRitualUnlocked(false)}
               className="absolute top-6 right-6 text-malamaya hover:text-maiba-red text-sm"
             >
-              ✕ Close
+              <X className="w-3.5 h-3.5 inline-block mr-1" strokeWidth={1.5} />
+              Close
             </button>
             <motion.div
               initial={{ opacity: 0, y: 20 }}

@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import { useState, useEffect, FormEvent } from "react";
+import { AtSign, Briefcase, Mail, ExternalLink, Flame, Radio } from "lucide-react";
 
 const fadeUp = {
   initial: { opacity: 0, y: 30 },
@@ -26,6 +27,21 @@ const defaults: ContactContent = {
     { label: "Email", href: "mailto:hello@maiba.studio", icon: "" },
   ],
 };
+
+const socialIconMap: Record<string, React.ComponentType<{ className?: string; strokeWidth?: number }>> = {
+  twitter: AtSign,
+  x: AtSign,
+  linkedin: Briefcase,
+  email: Mail,
+  mail: Mail,
+  farcaster: Radio,
+};
+
+function SocialIcon({ label, className }: { label: string; className?: string }) {
+  const Icon = socialIconMap[label.toLowerCase()];
+  if (Icon) return <Icon className={className} strokeWidth={1.5} />;
+  return <ExternalLink className={className} strokeWidth={1.5} />;
+}
 
 export default function ContactSection() {
   const [submitted, setSubmitted] = useState(false);
@@ -65,7 +81,9 @@ export default function ContactSection() {
             animate={{ opacity: 1, scale: 1 }}
             className="text-center py-20"
           >
-            <div className="text-4xl mb-6">🕯️</div>
+            <div className="mb-6">
+              <Flame className="w-10 h-10 text-maiba-red mx-auto" strokeWidth={1.5} />
+            </div>
             <p className="font-display text-2xl mb-3">Candle lit.</p>
             <p className="text-malamaya">
               Your trace has been left. We&apos;ll find you in the light.
@@ -152,9 +170,7 @@ export default function ContactSection() {
                 rel="noopener noreferrer"
                 className="flex items-center gap-2 text-malamaya text-sm hover:text-maiba-red transition-colors duration-300"
               >
-                {link.icon && (
-                  <img src={link.icon} alt="" className="w-4 h-4 rounded-sm object-contain" />
-                )}
+                <SocialIcon label={link.label} className="w-4 h-4" />
                 {link.label}
               </a>
             ))}

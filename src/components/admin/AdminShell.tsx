@@ -2,19 +2,20 @@
 
 import { useRouter, usePathname } from "next/navigation";
 import { ReactNode, useEffect, useState } from "react";
+import { LayoutDashboard, BookOpen, Globe, Settings, LogOut, type LucideIcon } from "lucide-react";
 
 interface NavItem {
   href: string;
   label: string;
-  icon: string;
+  icon: LucideIcon;
   adminOnly?: boolean;
 }
 
 const navItems: NavItem[] = [
-  { href: "/admin", label: "Dashboard", icon: "◆" },
-  { href: "/admin/entries", label: "Field Notes", icon: "◇" },
-  { href: "/admin/site", label: "Site Content", icon: "○", adminOnly: true },
-  { href: "/admin/accounts", label: "Accounts", icon: "⚙", adminOnly: true },
+  { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
+  { href: "/admin/entries", label: "Field Notes", icon: BookOpen },
+  { href: "/admin/site", label: "Site Content", icon: Globe, adminOnly: true },
+  { href: "/admin/accounts", label: "Accounts", icon: Settings, adminOnly: true },
 ];
 
 export default function AdminShell({ children }: { children: ReactNode }) {
@@ -72,7 +73,7 @@ export default function AdminShell({ children }: { children: ReactNode }) {
                     : "text-malamaya hover:text-foreground hover:bg-white/[0.02]"
                 }`}
               >
-                <span className="text-xs">{item.icon}</span>
+                <item.icon className="w-4 h-4" strokeWidth={1.5} />
                 {item.label}
               </a>
             );
@@ -92,7 +93,7 @@ export default function AdminShell({ children }: { children: ReactNode }) {
             onClick={handleLogout}
             className="flex items-center gap-3 px-3 py-2.5 text-sm text-malamaya hover:text-maiba-red transition-colors w-full"
           >
-            <span className="text-xs">✕</span>
+            <LogOut className="w-4 h-4" strokeWidth={1.5} />
             Log out
           </button>
         </div>

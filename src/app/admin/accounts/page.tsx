@@ -2,6 +2,7 @@
 
 import { useEffect, useState, FormEvent } from "react";
 import AdminShell from "@/components/admin/AdminShell";
+import { X } from "lucide-react";
 
 interface UserInfo {
   id: string;
@@ -367,7 +368,7 @@ export default function AccountsPage() {
                 onClick={() => setEditing(null)}
                 className="text-malamaya hover:text-maiba-red text-sm"
               >
-                ✕
+                <X className="w-4 h-4" strokeWidth={1.5} />
               </button>
             </div>
             <form onSubmit={handleEditSave} className="space-y-4">

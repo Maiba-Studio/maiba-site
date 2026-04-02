@@ -4,6 +4,7 @@ import { useState, useRef, useEffect, FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { LAMP_QUOTES } from "@/data/lamp-quotes";
+import { X, Flame } from "lucide-react";
 
 function renderQuote(text: string) {
   const parts = text.split(/(\*'[^']*'\*)/g);
@@ -130,7 +131,8 @@ export default function Lamp() {
                 onClick={handleClose}
                 className="absolute -top-8 right-0 text-malamaya hover:text-maiba-red text-xs tracking-widest uppercase transition-colors"
               >
-                ✕ Close
+                <X className="w-3.5 h-3.5 inline-block mr-1" strokeWidth={1.5} />
+                Close
               </button>
 
               <div className="border border-malamaya-border/40 bg-midnight/80 backdrop-blur-md rounded-sm p-8">
@@ -191,7 +193,7 @@ export default function Lamp() {
                             transition={{ duration: 0.8, ease: "easeOut" as const }}
                             className="text-maiba-red text-3xl mb-4"
                           >
-                            🕯️
+                            <Flame className="w-8 h-8 text-maiba-red mx-auto" strokeWidth={1.5} />
                           </motion.div>
                           <p className="font-display text-lg text-maiba-red mb-2">
                             {response}
