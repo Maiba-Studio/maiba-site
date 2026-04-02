@@ -12,12 +12,20 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
-  const isAdmin = await getSession();
-  if (!isAdmin) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  try {
+    const isAdmin = await getSession();
+    if (!isAdmin) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
 
-  const data = await req.json();
-  const entry = await createEntry(data);
-  return NextResponse.json(entry, { status: 201 });
+    const data = await req.json();
+    const entry = await createEntry(data);
+    return NextResponse.json(entry, { status: 201 });
+  } catch (err) {
+    console.error("POST /api/entries error:", err);
+    return NextResponse.json(
+      { error: err instanceof Error ? err.message : "Internal server error" },
+      { status: 500 }
+    );
+  }
 }

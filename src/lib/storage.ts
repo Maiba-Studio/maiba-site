@@ -1,4 +1,4 @@
-import { put, head } from "@vercel/blob";
+import { put, head, del, list } from "@vercel/blob";
 import fs from "fs/promises";
 import path from "path";
 
@@ -42,11 +42,21 @@ export async function writeJSON<T>(filename: string, data: T): Promise<void> {
   const json = JSON.stringify(data, null, 2);
 
   if (IS_VERCEL) {
-    await put(blobKey(filename), json, {
+    const key = blobKey(filename);
+
+    try {
+      const existing = await list({ prefix: key });
+      for (const blob of existing.blobs) {
+        await del(blob.url);
+      }
+    } catch {
+      // no existing blob to delete — fine
+    }
+
+    await put(key, json, {
       access: "public",
       contentType: "application/json",
       addRandomSuffix: false,
-      allowOverwrite: true,
     });
     return;
   }

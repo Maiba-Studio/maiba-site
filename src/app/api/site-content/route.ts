@@ -8,12 +8,20 @@ export async function GET() {
 }
 
 export async function PUT(req: NextRequest) {
-  const session = await getSession();
-  if (!session || session.role !== "admin") {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  try {
+    const session = await getSession();
+    if (!session || session.role !== "admin") {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
 
-  const data = await req.json();
-  await saveSiteContent(data);
-  return NextResponse.json({ success: true });
+    const data = await req.json();
+    await saveSiteContent(data);
+    return NextResponse.json({ success: true });
+  } catch (err) {
+    console.error("PUT /api/site-content error:", err);
+    return NextResponse.json(
+      { error: err instanceof Error ? err.message : "Internal server error" },
+      { status: 500 }
+    );
+  }
 }
