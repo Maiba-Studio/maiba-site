@@ -2,7 +2,8 @@
 
 import { motion } from "framer-motion";
 import { useState, useEffect, FormEvent } from "react";
-import { AtSign, Briefcase, Mail, ExternalLink, Flame, Radio } from "lucide-react";
+import { Flame } from "lucide-react";
+import { SocialIconRenderer } from "@/lib/social-icons";
 
 const fadeUp = {
   initial: { opacity: 0, y: 30 },
@@ -14,34 +15,18 @@ const fadeUp = {
 interface ContactContent {
   title: string;
   subtitle: string;
-  socialLinks: { label: string; href: string; icon: string }[];
+  socialLinks: { label: string; href: string; icon: string; iconId?: string }[];
 }
 
 const defaults: ContactContent = {
   title: "Join the Cult",
   subtitle: "Want to build something deviant?\nLeave a trace. Light a candle.",
   socialLinks: [
-    { label: "Twitter", href: "https://twitter.com", icon: "" },
-    { label: "LinkedIn", href: "https://linkedin.com", icon: "" },
-    { label: "Farcaster", href: "https://warpcast.com", icon: "" },
-    { label: "Email", href: "mailto:hello@maiba.studio", icon: "" },
+    { label: "X (Twitter)", href: "https://twitter.com", icon: "", iconId: "x" },
+    { label: "LinkedIn", href: "https://linkedin.com", icon: "", iconId: "linkedin" },
+    { label: "Email", href: "mailto:hello@maiba.studio", icon: "", iconId: "email" },
   ],
 };
-
-const socialIconMap: Record<string, React.ComponentType<{ className?: string; strokeWidth?: number }>> = {
-  twitter: AtSign,
-  x: AtSign,
-  linkedin: Briefcase,
-  email: Mail,
-  mail: Mail,
-  farcaster: Radio,
-};
-
-function SocialIcon({ label, className }: { label: string; className?: string }) {
-  const Icon = socialIconMap[label.toLowerCase()];
-  if (Icon) return <Icon className={className} strokeWidth={1.5} />;
-  return <ExternalLink className={className} strokeWidth={1.5} />;
-}
 
 export default function ContactSection() {
   const [submitted, setSubmitted] = useState(false);
@@ -162,15 +147,19 @@ export default function ContactSection() {
             Find us in the periphery
           </p>
           <div className="flex flex-wrap justify-center gap-4 sm:gap-8">
-            {content.socialLinks.map((link) => (
+            {content.socialLinks.map((link, i) => (
               <a
-                key={link.label}
+                key={`${link.label}-${i}`}
                 href={link.href}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center gap-2 text-malamaya text-sm hover:text-maiba-red transition-colors duration-300"
               >
-                <SocialIcon label={link.label} className="w-4 h-4" />
+                <SocialIconRenderer
+                  iconId={link.iconId || ""}
+                  customIconUrl={link.icon}
+                  size={16}
+                />
                 {link.label}
               </a>
             ))}

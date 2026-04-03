@@ -3,6 +3,7 @@
 import { useEffect, useState, FormEvent } from "react";
 import AdminShell from "@/components/admin/AdminShell";
 import type { SiteContent, SocialLink, LampWord } from "@/lib/data";
+import { SOCIAL_ICON_PRESETS, SocialIconRenderer } from "@/lib/social-icons";
 
 type Tab = "hero" | "about" | "contact" | "ritual" | "lamp";
 
@@ -175,7 +176,7 @@ export default function SiteContentPage() {
         ...content.contact,
         socialLinks: [
           ...content.contact.socialLinks,
-          { label: "", href: "", icon: "" },
+          { label: "", href: "", icon: "", iconId: "x" },
         ],
       },
     });
@@ -328,25 +329,67 @@ export default function SiteContentPage() {
               <div className="space-y-3">
                 {content.contact.socialLinks.map((link, i) => (
                   <div key={i} className="border border-malamaya-border/20 rounded-sm p-4 space-y-3">
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       <Field label="Label">
-                        <input type="text" value={link.label} onChange={(e) => updateSocialLink(i, { label: e.target.value })} className="admin-input" placeholder="Twitter" />
+                        <input type="text" value={link.label} onChange={(e) => updateSocialLink(i, { label: e.target.value })} className="admin-input" placeholder="Display name" />
                       </Field>
                       <Field label="URL">
                         <input type="text" value={link.href} onChange={(e) => updateSocialLink(i, { href: e.target.value })} className="admin-input" placeholder="https://..." />
                       </Field>
-                      <Field label="Icon URL" hint="optional thumbnail">
-                        <input type="text" value={link.icon} onChange={(e) => updateSocialLink(i, { icon: e.target.value })} className="admin-input" placeholder="https://icon..." />
-                      </Field>
                     </div>
-                    <div className="flex items-center justify-between">
-                      {link.icon && (
-                        <img src={link.icon} alt="" className="w-5 h-5 rounded-sm object-contain" />
-                      )}
+
+                    <Field label="Icon">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 flex items-center justify-center border border-malamaya-border/30 rounded-sm bg-midnight/50 flex-shrink-0 text-foreground">
+                          <SocialIconRenderer
+                            iconId={link.iconId || ""}
+                            customIconUrl={link.icon}
+                            size={18}
+                          />
+                        </div>
+                        <select
+                          value={link.iconId || "custom"}
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            if (val === "custom") {
+                              updateSocialLink(i, { iconId: "custom" });
+                            } else {
+                              const preset = SOCIAL_ICON_PRESETS.find((p) => p.id === val);
+                              updateSocialLink(i, {
+                                iconId: val,
+                                label: link.label || preset?.label || "",
+                              });
+                            }
+                          }}
+                          className="admin-input flex-1"
+                        >
+                          {SOCIAL_ICON_PRESETS.map((preset) => (
+                            <option key={preset.id} value={preset.id}>
+                              {preset.label}
+                            </option>
+                          ))}
+                          <option value="custom">Custom Image URL</option>
+                        </select>
+                      </div>
+                    </Field>
+
+                    {(link.iconId === "custom" || (!link.iconId && link.icon)) && (
+                      <Field label="Custom Icon URL" hint="direct link to an image">
+                        <input
+                          type="text"
+                          value={link.icon}
+                          onChange={(e) => updateSocialLink(i, { icon: e.target.value })}
+                          className="admin-input"
+                          placeholder="https://example.com/icon.svg"
+                        />
+                      </Field>
+                    )}
+
+                    <div className="flex justify-end">
                       <button
                         type="button"
                         onClick={() => removeSocialLink(i)}
-                        className="text-[10px] text-maiba-red/60 hover:text-maiba-red tracking-widest uppercase transition-colors ml-auto"
+                        className="text-[10px] text-maiba-red/60 hover:text-maiba-red tracking-widest uppercase transition-colors"
                       >
                         Remove
                       </button>

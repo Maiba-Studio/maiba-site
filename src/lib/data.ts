@@ -22,6 +22,7 @@ export interface SocialLink {
   label: string;
   href: string;
   icon: string;
+  iconId?: string;
 }
 
 export interface SiteContent {
@@ -404,10 +405,9 @@ function getDefaultSiteContent(): SiteContent {
       subtitle:
         "Want to build something deviant?\nLeave a trace. Light a candle.",
       socialLinks: [
-        { label: "Twitter", href: "https://twitter.com", icon: "" },
-        { label: "LinkedIn", href: "https://linkedin.com", icon: "" },
-        { label: "Farcaster", href: "https://warpcast.com", icon: "" },
-        { label: "Email", href: "mailto:hello@maiba.studio", icon: "" },
+        { label: "X (Twitter)", href: "https://twitter.com", icon: "", iconId: "x" },
+        { label: "LinkedIn", href: "https://linkedin.com", icon: "", iconId: "linkedin" },
+        { label: "Email", href: "mailto:hello@maiba.studio", icon: "", iconId: "email" },
       ],
     },
     ritual: {
