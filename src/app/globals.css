@@ -126,3 +126,105 @@ html {
 .admin-input::placeholder {
   color: color-mix(in srgb, var(--color-malamaya-border) 80%, transparent);
 }
+
+/* Tiptap rich text editor */
+.tiptap {
+  outline: none;
+}
+.tiptap p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  float: left;
+  color: color-mix(in srgb, var(--color-malamaya-border) 80%, transparent);
+  pointer-events: none;
+  height: 0;
+}
+.tiptap h1 { font-size: 1.75rem; font-weight: 700; margin: 1.5rem 0 0.75rem; }
+.tiptap h2 { font-size: 1.375rem; font-weight: 600; margin: 1.25rem 0 0.625rem; }
+.tiptap h3 { font-size: 1.125rem; font-weight: 600; margin: 1rem 0 0.5rem; }
+.tiptap p { margin: 0.5rem 0; color: var(--color-malamaya-light); }
+.tiptap ul, .tiptap ol { padding-left: 1.5rem; margin: 0.5rem 0; color: var(--color-malamaya-light); }
+.tiptap ul { list-style: disc; }
+.tiptap ol { list-style: decimal; }
+.tiptap li { margin: 0.25rem 0; }
+.tiptap blockquote {
+  border-left: 2px solid var(--color-malamaya-border);
+  padding-left: 1rem;
+  margin: 0.75rem 0;
+  color: var(--color-malamaya-light);
+  font-style: italic;
+}
+.tiptap pre {
+  background: rgba(42, 42, 42, 0.5);
+  border-radius: 2px;
+  padding: 0.75rem 1rem;
+  margin: 0.75rem 0;
+  overflow-x: auto;
+}
+.tiptap pre code {
+  color: var(--color-maiba-red);
+  font-family: var(--font-mono), monospace;
+  font-size: 0.8125rem;
+  background: none;
+  padding: 0;
+}
+.tiptap code {
+  color: var(--color-maiba-red);
+  background: rgba(42, 42, 42, 0.5);
+  padding: 0.125rem 0.375rem;
+  border-radius: 2px;
+  font-size: 0.8125rem;
+}
+.tiptap a { color: var(--color-maiba-red); text-decoration: underline; }
+.tiptap hr {
+  border: none;
+  border-top: 1px solid var(--color-malamaya-border);
+  margin: 1.5rem 0;
+}
+.tiptap img {
+  max-width: 100%;
+  border-radius: 2px;
+  border: 1px solid var(--color-malamaya-border);
+  margin: 0.75rem 0;
+}
+
+/* Field note article body (public page) */
+.field-note-body h1 { font-size: 1.75rem; font-weight: 700; margin: 1.5rem 0 0.75rem; color: var(--color-foreground); }
+.field-note-body h2 { font-size: 1.375rem; font-weight: 600; margin: 1.25rem 0 0.625rem; color: var(--color-foreground); }
+.field-note-body h3 { font-size: 1.125rem; font-weight: 600; margin: 1rem 0 0.5rem; color: var(--color-foreground); }
+.field-note-body p { margin: 0.5rem 0; color: var(--color-malamaya-light); line-height: 2; }
+.field-note-body ul, .field-note-body ol { padding-left: 1.5rem; margin: 0.5rem 0; color: var(--color-malamaya-light); }
+.field-note-body ul { list-style: disc; }
+.field-note-body ol { list-style: decimal; }
+.field-note-body li { margin: 0.25rem 0; }
+.field-note-body blockquote {
+  border-left: 2px solid var(--color-malamaya-border);
+  padding-left: 1rem;
+  margin: 1rem 0;
+  color: var(--color-malamaya-light);
+  font-style: italic;
+}
+.field-note-body pre {
+  background: rgba(42, 42, 42, 0.5);
+  border-radius: 2px;
+  padding: 0.75rem 1rem;
+  margin: 1rem 0;
+  overflow-x: auto;
+}
+.field-note-body pre code {
+  color: var(--color-maiba-red);
+  font-family: var(--font-mono), monospace;
+  font-size: 0.8125rem;
+  background: none;
+  padding: 0;
+}
+.field-note-body code {
+  color: var(--color-maiba-red);
+  background: rgba(42, 42, 42, 0.5);
+  padding: 0.125rem 0.375rem;
+  border-radius: 2px;
+  font-size: 0.8125rem;
+}
+.field-note-body a { color: var(--color-maiba-red); text-decoration: underline; }
+.field-note-body hr { border: none; border-top: 1px solid var(--color-malamaya-border); margin: 2rem 0; }
+.field-note-body img { max-width: 100%; border-radius: 2px; border: 1px solid rgba(42, 42, 42, 0.3); margin: 1rem 0; }
+.field-note-body strong { color: var(--color-foreground); }

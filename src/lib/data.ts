@@ -12,6 +12,7 @@ export interface FieldNote {
   thumbnail: string;
   images: string[];
   links: { label: string; url: string }[];
+  seoTags: string[];
   published: boolean;
   createdAt: string;
   updatedAt: string;
@@ -260,6 +261,7 @@ function getDefaultEntries(): FieldNote[] {
       thumbnail: "/images/thumbnail-placeholder.png",
       images: [],
       links: [],
+      seoTags: ["tattoo", "moth", "body art", "concept art"],
       published: true,
       createdAt: now,
       updatedAt: now,
@@ -276,6 +278,7 @@ function getDefaultEntries(): FieldNote[] {
       thumbnail: "/images/thumbnail-placeholder.png",
       images: [],
       links: [],
+      seoTags: ["PC build", "GPU", "Blender", "Unreal Engine"],
       published: true,
       createdAt: now,
       updatedAt: now,
@@ -292,6 +295,7 @@ function getDefaultEntries(): FieldNote[] {
       thumbnail: "/images/thumbnail-placeholder.png",
       images: [],
       links: [],
+      seoTags: ["D&D", "TTRPG", "character lore", "worldbuilding"],
       published: true,
       createdAt: now,
       updatedAt: now,
@@ -308,6 +312,7 @@ function getDefaultEntries(): FieldNote[] {
       thumbnail: "/images/thumbnail-placeholder.png",
       images: [],
       links: [],
+      seoTags: ["creativity", "studio log", "process"],
       published: true,
       createdAt: now,
       updatedAt: now,
@@ -324,6 +329,7 @@ function getDefaultEntries(): FieldNote[] {
       thumbnail: "/images/thumbnail-placeholder.png",
       images: [],
       links: [],
+      seoTags: ["ink drawing", "moth", "observational art"],
       published: true,
       createdAt: now,
       updatedAt: now,
@@ -340,6 +346,7 @@ function getDefaultEntries(): FieldNote[] {
       thumbnail: "/images/thumbnail-placeholder.png",
       images: [],
       links: [],
+      seoTags: ["color theory", "branding", "design"],
       published: true,
       createdAt: now,
       updatedAt: now,

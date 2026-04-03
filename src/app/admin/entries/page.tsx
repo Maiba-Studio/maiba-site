@@ -42,12 +42,20 @@ export default function EntriesPage() {
   };
 
   const handleTogglePublish = async (entry: FieldNote) => {
-    await fetch(`/api/entries/${entry.id}`, {
-      method: "PUT",
-      credentials: "include",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ published: !entry.published }),
-    });
+    try {
+      const res = await fetch(`/api/entries/${entry.id}`, {
+        method: "PUT",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ published: !entry.published }),
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        alert(data.error || "Failed to update publish state");
+      }
+    } catch {
+      alert("Connection failed");
+    }
     loadEntries();
   };
 
@@ -128,6 +136,15 @@ export default function EntriesPage() {
                 <p className="text-malamaya text-sm mt-1 truncate">
                   {entry.excerpt}
                 </p>
+                {entry.seoTags && entry.seoTags.length > 0 && (
+                  <div className="flex flex-wrap gap-1.5 mt-2">
+                    {entry.seoTags.map((t, i) => (
+                      <span key={i} className="text-[10px] text-maiba-red/70 border border-maiba-red/15 px-1.5 py-0.5 rounded-sm">
+                        #{t}
+                      </span>
+                    ))}
+                  </div>
+                )}
               </div>
 
               <div className="flex items-center gap-2 flex-shrink-0">

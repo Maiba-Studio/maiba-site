@@ -1,7 +1,9 @@
 "use client";
 
-import { useState, FormEvent } from "react";
+import { useState, FormEvent, KeyboardEvent } from "react";
+import { X } from "lucide-react";
 import type { FieldNote } from "@/lib/data";
+import RichTextEditor from "./RichTextEditor";
 
 const TAGS = ["drawing", "log", "code", "vision", "shadow"] as const;
 
@@ -24,30 +26,36 @@ export default function EntryForm({ entry, onSaved }: Props) {
     entry?.date ?? new Date().toISOString().slice(0, 10)
   );
   const [thumbnail, setThumbnail] = useState(entry?.thumbnail ?? "");
-  const [images, setImages] = useState(entry?.images?.join("\n") ?? "");
-  const [links, setLinks] = useState(
-    entry?.links?.map((l) => `${l.label}|${l.url}`).join("\n") ?? ""
-  );
+  const [seoTags, setSeoTags] = useState<string[]>(entry?.seoTags ?? []);
+  const [seoTagInput, setSeoTagInput] = useState("");
   const [published, setPublished] = useState(entry?.published ?? false);
+
+  const addSeoTag = (value: string) => {
+    const trimmed = value.trim().replace(/^#/, "");
+    if (trimmed && !seoTags.includes(trimmed)) {
+      setSeoTags([...seoTags, trimmed]);
+    }
+    setSeoTagInput("");
+  };
+
+  const handleSeoTagKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter" || e.key === ",") {
+      e.preventDefault();
+      addSeoTag(seoTagInput);
+    }
+    if (e.key === "Backspace" && !seoTagInput && seoTags.length > 0) {
+      setSeoTags(seoTags.slice(0, -1));
+    }
+  };
+
+  const removeSeoTag = (index: number) => {
+    setSeoTags(seoTags.filter((_, i) => i !== index));
+  };
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setError("");
     setSaving(true);
-
-    const parsedLinks = links
-      .split("\n")
-      .filter((l) => l.trim())
-      .map((l) => {
-        const [label, url] = l.split("|");
-        return { label: label?.trim() || "", url: url?.trim() || "" };
-      })
-      .filter((l) => l.url);
-
-    const parsedImages = images
-      .split("\n")
-      .map((s) => s.trim())
-      .filter(Boolean);
 
     const payload = {
       title,
@@ -57,8 +65,9 @@ export default function EntryForm({ entry, onSaved }: Props) {
       tag,
       date,
       thumbnail,
-      images: parsedImages,
-      links: parsedLinks,
+      images: [],
+      links: [],
+      seoTags,
       published,
     };
 
@@ -92,8 +101,7 @@ export default function EntryForm({ entry, onSaved }: Props) {
         {isEdit ? "Edit Entry" : "New Entry"}
       </h2>
 
-      <form onSubmit={handleSubmit} className="space-y-6 max-w-2xl">
-        {/* Title */}
+      <form onSubmit={handleSubmit} className="space-y-6 max-w-3xl">
         <Field label="Title">
           <input
             type="text"
@@ -105,7 +113,6 @@ export default function EntryForm({ entry, onSaved }: Props) {
           />
         </Field>
 
-        {/* Headline */}
         <Field label="Headline" hint="Short subtitle for cards">
           <input
             type="text"
@@ -116,7 +123,6 @@ export default function EntryForm({ entry, onSaved }: Props) {
           />
         </Field>
 
-        {/* Tag + Date row */}
         <div className="grid grid-cols-2 gap-4">
           <Field label="Tag">
             <select
@@ -143,7 +149,6 @@ export default function EntryForm({ entry, onSaved }: Props) {
           </Field>
         </div>
 
-        {/* Excerpt */}
         <Field label="Excerpt" hint="Shown in the grid card">
           <textarea
             value={excerpt}
@@ -155,18 +160,14 @@ export default function EntryForm({ entry, onSaved }: Props) {
           />
         </Field>
 
-        {/* Body */}
-        <Field label="Body" hint="Full content (optional, supports plain text)">
-          <textarea
-            value={body}
-            onChange={(e) => setBody(e.target.value)}
-            rows={8}
-            className="admin-input resize-y"
-            placeholder="Full entry content..."
+        <Field label="Body" hint="Rich text — full article content">
+          <RichTextEditor
+            content={body}
+            onChange={setBody}
+            placeholder="Write your field note here..."
           />
         </Field>
 
-        {/* Thumbnail */}
         <Field label="Thumbnail URL" hint="Absolute URL or site path (e.g. /images/...)">
           <input
             type="text"
@@ -177,29 +178,35 @@ export default function EntryForm({ entry, onSaved }: Props) {
           />
         </Field>
 
-        {/* Images */}
-        <Field label="Images" hint="One URL per line">
-          <textarea
-            value={images}
-            onChange={(e) => setImages(e.target.value)}
-            rows={3}
-            className="admin-input resize-none"
-            placeholder={"https://image1.jpg\nhttps://image2.jpg"}
-          />
+        <Field label="SEO Tags" hint="Press Enter or comma to add. Visible on the public page.">
+          <div className="admin-input flex flex-wrap gap-2 min-h-[42px] items-center !p-2">
+            {seoTags.map((t, i) => (
+              <span
+                key={i}
+                className="inline-flex items-center gap-1 bg-maiba-red/10 border border-maiba-red/30 text-maiba-red text-xs px-2.5 py-1 rounded-sm"
+              >
+                #{t}
+                <button
+                  type="button"
+                  onClick={() => removeSeoTag(i)}
+                  className="hover:text-foreground transition-colors"
+                >
+                  <X className="w-3 h-3" strokeWidth={2} />
+                </button>
+              </span>
+            ))}
+            <input
+              type="text"
+              value={seoTagInput}
+              onChange={(e) => setSeoTagInput(e.target.value)}
+              onKeyDown={handleSeoTagKeyDown}
+              onBlur={() => { if (seoTagInput.trim()) addSeoTag(seoTagInput); }}
+              className="flex-1 min-w-[120px] bg-transparent border-none outline-none text-foreground text-sm placeholder:text-malamaya-border/60"
+              placeholder={seoTags.length === 0 ? "art, design, creative tech..." : ""}
+            />
+          </div>
         </Field>
 
-        {/* Links */}
-        <Field label="Links" hint="Format: Label|URL — one per line">
-          <textarea
-            value={links}
-            onChange={(e) => setLinks(e.target.value)}
-            rows={3}
-            className="admin-input resize-none"
-            placeholder={"GitHub|https://github.com\nDemo|https://demo.com"}
-          />
-        </Field>
-
-        {/* Published toggle */}
         <label className="flex items-center gap-3 cursor-pointer">
           <div
             className={`w-10 h-5 rounded-full relative transition-colors ${

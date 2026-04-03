@@ -24,6 +24,7 @@ interface FieldNote {
   thumbnail: string;
   images: string[];
   links: { label: string; url: string }[];
+  seoTags?: string[];
 }
 
 export default function FieldNotePage() {
@@ -141,69 +142,27 @@ export default function FieldNotePage() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.6, delay: 0.25 }}
-            className="prose-invert mb-12"
-          >
-            {entry.body.split("\n").map((paragraph, i) =>
-              paragraph.trim() === "" ? (
-                <div key={i} className="h-6" />
-              ) : (
-                <p
-                  key={i}
-                  className="text-malamaya-light text-base leading-8 mb-4"
-                >
-                  {paragraph}
-                </p>
-              )
-            )}
-          </motion.div>
+            className="field-note-body mb-12 text-base"
+            dangerouslySetInnerHTML={{ __html: entry.body }}
+          />
         )}
 
-        {/* Images gallery */}
-        {entry.images.length > 0 && (
+        {/* SEO Tags */}
+        {entry.seoTags && entry.seoTags.length > 0 && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.6, delay: 0.35 }}
-            className="mb-12 space-y-4"
-          >
-            <p className="text-xs tracking-widest uppercase text-malamaya mb-4">
-              Gallery
-            </p>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {entry.images.map((img, i) => (
-                <img
-                  key={i}
-                  src={img}
-                  alt={`${entry.title} — ${i + 1}`}
-                  className="w-full rounded-sm border border-malamaya-border/20"
-                />
-              ))}
-            </div>
-          </motion.div>
-        )}
-
-        {/* Links */}
-        {entry.links.length > 0 && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.6, delay: 0.4 }}
             className="mb-12"
           >
-            <p className="text-xs tracking-widest uppercase text-malamaya mb-4">
-              Links
-            </p>
-            <div className="flex flex-wrap gap-3">
-              {entry.links.map((link, i) => (
-                <a
+            <div className="flex flex-wrap gap-2">
+              {entry.seoTags.map((seoTag, i) => (
+                <span
                   key={i}
-                  href={link.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-sm border border-malamaya-border/30 px-4 py-2 rounded-sm text-malamaya hover:text-maiba-red hover:border-maiba-red/30 transition-colors"
+                  className="text-xs text-maiba-red/80 border border-maiba-red/20 px-3 py-1 rounded-sm"
                 >
-                  {link.label} ↗
-                </a>
+                  #{seoTag}
+                </span>
               ))}
             </div>
           </motion.div>
