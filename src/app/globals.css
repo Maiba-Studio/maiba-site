@@ -134,6 +134,13 @@ html {
 .admin-input::placeholder {
   color: color-mix(in srgb, var(--color-malamaya-border) 80%, transparent);
 }
+select.admin-input {
+  background-color: var(--color-midnight);
+}
+select.admin-input option {
+  background-color: var(--color-midnight);
+  color: var(--color-foreground);
+}
 
 /* Tiptap rich text editor */
 .tiptap {
