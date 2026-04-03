@@ -1,4 +1,4 @@
-import { put, del, list } from "@vercel/blob";
+import { put, del, list, get } from "@vercel/blob";
 import fs from "fs/promises";
 import path from "path";
 
@@ -20,13 +20,10 @@ function blobKey(filename: string) {
 export async function readJSON<T>(filename: string, fallback: T): Promise<T> {
   if (IS_VERCEL) {
     try {
-      const key = blobKey(filename);
-      const blobs = await list({ prefix: key });
-      const match = blobs.blobs.find((b) => b.pathname === key);
-      if (!match) return fallback;
-      const res = await fetch(match.downloadUrl, { cache: "no-store" });
-      if (!res.ok) return fallback;
-      return (await res.json()) as T;
+      const result = await get(blobKey(filename), { access: "private" });
+      if (!result) return fallback;
+      const response = new Response(result.stream);
+      return (await response.json()) as T;
     } catch {
       return fallback;
     }

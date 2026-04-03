@@ -22,18 +22,26 @@ export async function PUT(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const isAdmin = await getSession();
-  if (!isAdmin) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  try {
+    const isAdmin = await getSession();
+    if (!isAdmin) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
 
-  const { id } = await params;
-  const data = await req.json();
-  const entry = await updateEntry(id, data);
-  if (!entry) {
-    return NextResponse.json({ error: "Not found" }, { status: 404 });
+    const { id } = await params;
+    const data = await req.json();
+    const entry = await updateEntry(id, data);
+    if (!entry) {
+      return NextResponse.json({ error: "Not found" }, { status: 404 });
+    }
+    return NextResponse.json(entry);
+  } catch (err) {
+    console.error("PUT /api/entries/[id] error:", err);
+    return NextResponse.json(
+      { error: err instanceof Error ? err.message : "Internal server error" },
+      { status: 500 }
+    );
   }
-  return NextResponse.json(entry);
 }
 
 export async function DELETE(
