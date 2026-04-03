@@ -4,7 +4,7 @@ import { useEffect, useState, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import Lamp from "./Lamp";
-import { X, AtSign, Briefcase, Radio } from "lucide-react";
+import { X } from "lucide-react";
 
 const KONAMI = [
   "ArrowUp", "ArrowUp", "ArrowDown", "ArrowDown",
@@ -137,23 +137,9 @@ export default function Footer() {
     <footer ref={footerRef} className="relative border-t border-malamaya-border mt-auto">
       {/* Visible footer */}
       <div className="max-w-7xl mx-auto px-6 py-12">
-        <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+        <div className="flex items-center justify-center">
           <div className="text-malamaya text-sm">
             &copy; {new Date().getFullYear()} Maiba Studio. Deviant Made.
-          </div>
-          <div className="flex items-center gap-6 text-malamaya text-sm">
-            <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 hover:text-maiba-red transition-colors">
-              <AtSign className="w-4 h-4" strokeWidth={1.5} />
-              <span>Twitter</span>
-            </a>
-            <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 hover:text-maiba-red transition-colors">
-              <Briefcase className="w-4 h-4" strokeWidth={1.5} />
-              <span>LinkedIn</span>
-            </a>
-            <a href="https://warpcast.com" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 hover:text-maiba-red transition-colors">
-              <Radio className="w-4 h-4" strokeWidth={1.5} />
-              <span>Farcaster</span>
-            </a>
           </div>
         </div>
       </div>
