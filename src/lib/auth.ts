@@ -2,6 +2,7 @@ import bcrypt from "bcryptjs";
 import { SignJWT, jwtVerify } from "jose";
 import { cookies } from "next/headers";
 import { getUserByUsername, getLampWords, type UserRole } from "@/lib/data";
+import { readJSON, writeJSON } from "@/lib/storage";
 
 const SESSION_COOKIE = "maiba-session";
 const SESSION_DURATION = 60 * 60 * 8; // 8 hours
@@ -37,14 +38,33 @@ export async function verifyLampPassword(
   return { valid: false };
 }
 
+const ADMIN_PW_OVERRIDE_FILE = "admin-password-override.json";
+
+interface AdminPasswordOverride {
+  hash: string;
+}
+
+export async function getAdminPasswordHash(): Promise<string | null> {
+  const override = await readJSON<AdminPasswordOverride | null>(
+    ADMIN_PW_OVERRIDE_FILE,
+    null
+  );
+  if (override?.hash) return override.hash;
+  return process.env.ADMIN_PASSWORD_HASH || null;
+}
+
+export async function setAdminPasswordHash(hash: string): Promise<void> {
+  await writeJSON<AdminPasswordOverride>(ADMIN_PW_OVERRIDE_FILE, { hash });
+}
+
 export async function verifyCredentials(
   username: string,
   password: string
 ): Promise<{ valid: boolean; role?: UserRole; userId?: string }> {
   const envUsername = process.env.ADMIN_USERNAME;
-  const envHash = process.env.ADMIN_PASSWORD_HASH;
-  if (envUsername && envHash && username === envUsername) {
-    const match = await bcrypt.compare(password, envHash);
+  const adminHash = await getAdminPasswordHash();
+  if (envUsername && adminHash && username === envUsername) {
+    const match = await bcrypt.compare(password, adminHash);
     if (match) return { valid: true, role: "admin", userId: "env-admin" };
   }
 

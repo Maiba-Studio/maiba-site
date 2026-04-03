@@ -25,6 +25,10 @@ body {
   overflow-x: hidden;
 }
 
+.grecaptcha-badge {
+  visibility: hidden !important;
+}
+
 .scrollbar-none {
   -ms-overflow-style: none;
   scrollbar-width: none;

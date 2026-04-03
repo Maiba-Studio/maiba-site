@@ -2,8 +2,19 @@
 
 import { motion } from "framer-motion";
 import { useState, useEffect, FormEvent } from "react";
-import { Flame } from "lucide-react";
+import { Flame, Loader2 } from "lucide-react";
 import { SocialIconRenderer } from "@/lib/social-icons";
+
+declare global {
+  interface Window {
+    grecaptcha?: {
+      ready: (cb: () => void) => void;
+      execute: (siteKey: string, options: { action: string }) => Promise<string>;
+    };
+  }
+}
+
+const RECAPTCHA_SITE_KEY = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY || "";
 
 const fadeUp = {
   initial: { opacity: 0, y: 30 },
@@ -30,6 +41,11 @@ const defaults: ContactContent = {
 
 export default function ContactSection() {
   const [submitted, setSubmitted] = useState(false);
+  const [sending, setSending] = useState(false);
+  const [error, setError] = useState("");
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [message, setMessage] = useState("");
   const [content, setContent] = useState<ContactContent>(defaults);
 
   useEffect(() => {
@@ -41,9 +57,47 @@ export default function ContactSection() {
       .catch(() => {});
   }, []);
 
-  const handleSubmit = (e: FormEvent) => {
+  const getCaptchaToken = async (): Promise<string> => {
+    if (!RECAPTCHA_SITE_KEY || !window.grecaptcha) return "";
+    return new Promise((resolve) => {
+      window.grecaptcha!.ready(async () => {
+        try {
+          const token = await window.grecaptcha!.execute(RECAPTCHA_SITE_KEY, {
+            action: "contact",
+          });
+          resolve(token);
+        } catch {
+          resolve("");
+        }
+      });
+    });
+  };
+
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    setSubmitted(true);
+    setError("");
+    setSending(true);
+
+    try {
+      const captchaToken = await getCaptchaToken();
+
+      const res = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, email, message, captchaToken }),
+      });
+
+      if (res.ok) {
+        setSubmitted(true);
+      } else {
+        const data = await res.json().catch(() => ({}));
+        setError(data.error || "Something went wrong. Please try again.");
+      }
+    } catch {
+      setError("Connection failed. Please try again.");
+    } finally {
+      setSending(false);
+    }
   };
 
   return (
@@ -90,8 +144,11 @@ export default function ContactSection() {
               <input
                 id="contact-name"
                 type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
                 required
-                className="w-full bg-transparent border-b border-malamaya-border px-0 py-3 text-foreground focus:border-maiba-red focus:outline-none transition-colors placeholder:text-malamaya-border"
+                disabled={sending}
+                className="w-full bg-transparent border-b border-malamaya-border px-0 py-3 text-foreground focus:border-maiba-red focus:outline-none transition-colors placeholder:text-malamaya-border disabled:opacity-50"
                 placeholder="Your name, alias, or sigil"
               />
             </div>
@@ -102,8 +159,11 @@ export default function ContactSection() {
               <input
                 id="contact-email"
                 type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 required
-                className="w-full bg-transparent border-b border-malamaya-border px-0 py-3 text-foreground focus:border-maiba-red focus:outline-none transition-colors placeholder:text-malamaya-border"
+                disabled={sending}
+                className="w-full bg-transparent border-b border-malamaya-border px-0 py-3 text-foreground focus:border-maiba-red focus:outline-none transition-colors placeholder:text-malamaya-border disabled:opacity-50"
                 placeholder="Where to send the signal"
               />
             </div>
@@ -114,25 +174,52 @@ export default function ContactSection() {
               <textarea
                 id="contact-message"
                 rows={5}
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
                 required
-                className="w-full bg-transparent border-b border-malamaya-border px-0 py-3 text-foreground focus:border-maiba-red focus:outline-none transition-colors resize-none placeholder:text-malamaya-border"
+                disabled={sending}
+                className="w-full bg-transparent border-b border-malamaya-border px-0 py-3 text-foreground focus:border-maiba-red focus:outline-none transition-colors resize-none placeholder:text-malamaya-border disabled:opacity-50"
                 placeholder="What are you building? What keeps you up at night?"
               />
             </div>
+
+            {error && (
+              <p className="text-maiba-red text-sm text-center">{error}</p>
+            )}
+
             <motion.button
               type="submit"
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              className="group flex items-center gap-3 bg-maiba-red/10 border border-maiba-red/30 text-maiba-red px-8 py-4 rounded-sm hover:bg-maiba-red/20 transition-colors w-full justify-center"
+              disabled={sending}
+              whileHover={sending ? {} : { scale: 1.02 }}
+              whileTap={sending ? {} : { scale: 0.98 }}
+              className="group flex items-center gap-3 bg-maiba-red/10 border border-maiba-red/30 text-maiba-red px-8 py-4 rounded-sm hover:bg-maiba-red/20 transition-colors w-full justify-center disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <svg width="16" height="24" viewBox="0 0 16 24" fill="none" className="group-hover:drop-shadow-[0_0_6px_#f23d3d]">
-                <ellipse cx="8" cy="4" rx="3" ry="4" fill="#ff8c00" opacity="0.8">
-                  <animate attributeName="ry" values="4;3.5;4.5;4" dur="0.8s" repeatCount="indefinite" />
-                </ellipse>
-                <rect x="6" y="7" width="4" height="16" rx="1" fill="#e8e0d4" opacity="0.3" />
-              </svg>
-              <span className="text-sm tracking-widest uppercase">Light the Candle</span>
+              {sending ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <span className="text-sm tracking-widest uppercase">Sending...</span>
+                </>
+              ) : (
+                <>
+                  <svg width="16" height="24" viewBox="0 0 16 24" fill="none" className="group-hover:drop-shadow-[0_0_6px_#f23d3d]">
+                    <ellipse cx="8" cy="4" rx="3" ry="4" fill="#ff8c00" opacity="0.8">
+                      <animate attributeName="ry" values="4;3.5;4.5;4" dur="0.8s" repeatCount="indefinite" />
+                    </ellipse>
+                    <rect x="6" y="7" width="4" height="16" rx="1" fill="#e8e0d4" opacity="0.3" />
+                  </svg>
+                  <span className="text-sm tracking-widest uppercase">Light the Candle</span>
+                </>
+              )}
             </motion.button>
+
+            {RECAPTCHA_SITE_KEY && (
+              <p className="text-malamaya-border/60 text-[10px] text-center leading-relaxed">
+                Protected by reCAPTCHA.{" "}
+                <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer" className="underline hover:text-malamaya transition-colors">Privacy</a>
+                {" & "}
+                <a href="https://policies.google.com/terms" target="_blank" rel="noopener noreferrer" className="underline hover:text-malamaya transition-colors">Terms</a>
+              </p>
+            )}
           </motion.form>
         )}
 

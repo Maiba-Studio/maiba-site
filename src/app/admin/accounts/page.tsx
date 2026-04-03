@@ -2,7 +2,7 @@
 
 import { useEffect, useState, FormEvent } from "react";
 import AdminShell from "@/components/admin/AdminShell";
-import { X } from "lucide-react";
+import { X, Eye, EyeOff } from "lucide-react";
 
 interface UserInfo {
   id: string;
@@ -23,10 +23,14 @@ export default function AccountsPage() {
   const [confirmPw, setConfirmPw] = useState("");
   const [pwMsg, setPwMsg] = useState<{ type: "ok" | "err"; text: string } | null>(null);
   const [pwLoading, setPwLoading] = useState(false);
+  const [showCurrentPw, setShowCurrentPw] = useState(false);
+  const [showNewPw, setShowNewPw] = useState(false);
+  const [showConfirmPw, setShowConfirmPw] = useState(false);
 
   // New moderator
   const [newUsername, setNewUsername] = useState("");
   const [newModPw, setNewModPw] = useState("");
+  const [showModPw, setShowModPw] = useState(false);
   const [modMsg, setModMsg] = useState<{ type: "ok" | "err"; text: string } | null>(null);
   const [modLoading, setModLoading] = useState(false);
 
@@ -34,6 +38,7 @@ export default function AccountsPage() {
   const [editing, setEditing] = useState<UserInfo | null>(null);
   const [editUsername, setEditUsername] = useState("");
   const [editPassword, setEditPassword] = useState("");
+  const [showEditPw, setShowEditPw] = useState(false);
   const [editMsg, setEditMsg] = useState<{ type: "ok" | "err"; text: string } | null>(null);
 
   const fetchUsers = () => {
@@ -139,6 +144,7 @@ export default function AccountsPage() {
     setEditing(user);
     setEditUsername(user.username);
     setEditPassword("");
+    setShowEditPw(false);
     setEditMsg(null);
   };
 
@@ -210,33 +216,32 @@ export default function AccountsPage() {
       {/* ── Change Password ── */}
       {activeTab === "password" && (
         <form onSubmit={handleChangePassword} className="max-w-md space-y-5">
+          <input type="text" autoComplete="username" className="sr-only" tabIndex={-1} aria-hidden="true" defaultValue="" />
+
           <Field label="Current Password">
-            <input
-              type="password"
+            <PasswordInput
               value={currentPw}
-              onChange={(e) => setCurrentPw(e.target.value)}
-              required
-              className="admin-input"
+              onChange={setCurrentPw}
+              show={showCurrentPw}
+              onToggle={() => setShowCurrentPw((v) => !v)}
               autoComplete="current-password"
             />
           </Field>
           <Field label="New Password">
-            <input
-              type="password"
+            <PasswordInput
               value={newPw}
-              onChange={(e) => setNewPw(e.target.value)}
-              required
-              className="admin-input"
+              onChange={setNewPw}
+              show={showNewPw}
+              onToggle={() => setShowNewPw((v) => !v)}
               autoComplete="new-password"
             />
           </Field>
           <Field label="Confirm New Password">
-            <input
-              type="password"
+            <PasswordInput
               value={confirmPw}
-              onChange={(e) => setConfirmPw(e.target.value)}
-              required
-              className="admin-input"
+              onChange={setConfirmPw}
+              show={showConfirmPw}
+              onToggle={() => setShowConfirmPw((v) => !v)}
               autoComplete="new-password"
             />
           </Field>
@@ -281,12 +286,11 @@ export default function AccountsPage() {
                   />
                 </Field>
                 <Field label="Password">
-                  <input
-                    type="password"
+                  <PasswordInput
                     value={newModPw}
-                    onChange={(e) => setNewModPw(e.target.value)}
-                    required
-                    className="admin-input"
+                    onChange={setNewModPw}
+                    show={showModPw}
+                    onToggle={() => setShowModPw((v) => !v)}
                     autoComplete="new-password"
                   />
                 </Field>
@@ -378,15 +382,17 @@ export default function AccountsPage() {
                   value={editUsername}
                   onChange={(e) => setEditUsername(e.target.value)}
                   className="admin-input"
+                  autoComplete="username"
                 />
               </Field>
               <Field label="New Password" hint="leave blank to keep current">
-                <input
-                  type="password"
+                <PasswordInput
                   value={editPassword}
-                  onChange={(e) => setEditPassword(e.target.value)}
-                  className="admin-input"
+                  onChange={setEditPassword}
+                  show={showEditPw}
+                  onToggle={() => setShowEditPw((v) => !v)}
                   autoComplete="new-password"
+                  required={false}
                 />
               </Field>
 
@@ -439,6 +445,48 @@ function Field({
         )}
       </label>
       {children}
+    </div>
+  );
+}
+
+function PasswordInput({
+  value,
+  onChange,
+  show,
+  onToggle,
+  autoComplete,
+  required = true,
+}: {
+  value: string;
+  onChange: (val: string) => void;
+  show: boolean;
+  onToggle: () => void;
+  autoComplete?: string;
+  required?: boolean;
+}) {
+  return (
+    <div className="relative">
+      <input
+        type={show ? "text" : "password"}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        required={required}
+        className="admin-input pr-10"
+        autoComplete={autoComplete}
+      />
+      <button
+        type="button"
+        onClick={onToggle}
+        className="absolute right-2 top-1/2 -translate-y-1/2 text-malamaya hover:text-foreground transition-colors p-1"
+        tabIndex={-1}
+        aria-label={show ? "Hide password" : "Show password"}
+      >
+        {show ? (
+          <EyeOff className="w-4 h-4" strokeWidth={1.5} />
+        ) : (
+          <Eye className="w-4 h-4" strokeWidth={1.5} />
+        )}
+      </button>
     </div>
   );
 }
