@@ -200,12 +200,12 @@ export default function SiteContentPage() {
         </p>
       </div>
 
-      <div className="flex gap-1 mb-8 border-b border-malamaya-border/20">
+      <div className="flex gap-1 mb-8 border-b border-malamaya-border/20 overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0 scrollbar-none">
         {tabs.map((tab) => (
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
-            className={`px-5 py-3 text-sm tracking-widest uppercase transition-colors border-b-2 -mb-px ${
+            className={`px-3 sm:px-5 py-3 text-xs sm:text-sm tracking-widest uppercase transition-colors border-b-2 -mb-px whitespace-nowrap ${
               activeTab === tab.id
                 ? "border-maiba-red text-maiba-red"
                 : "border-transparent text-malamaya hover:text-foreground"
@@ -251,7 +251,7 @@ export default function SiteContentPage() {
             {/* Founder */}
             <div className="border border-malamaya-border/20 rounded-sm p-5 space-y-4">
               <p className="text-xs tracking-widest uppercase text-malamaya-light">Founder</p>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <Field label="Name">
                   <input type="text" value={content.about.founderName} onChange={(e) => updateAbout({ founderName: e.target.value })} className="admin-input" />
                 </Field>
@@ -273,7 +273,7 @@ export default function SiteContentPage() {
             {/* Alter Ego */}
             <div className="border border-malamaya-border/20 rounded-sm p-5 space-y-4">
               <p className="text-xs tracking-widest uppercase text-malamaya-light">Alter Ego</p>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <Field label="Name">
                   <input type="text" value={content.about.alterEgoName} onChange={(e) => updateAbout({ alterEgoName: e.target.value })} className="admin-input" />
                 </Field>
@@ -328,7 +328,7 @@ export default function SiteContentPage() {
               <div className="space-y-3">
                 {content.contact.socialLinks.map((link, i) => (
                   <div key={i} className="border border-malamaya-border/20 rounded-sm p-4 space-y-3">
-                    <div className="grid grid-cols-3 gap-3">
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                       <Field label="Label">
                         <input type="text" value={link.label} onChange={(e) => updateSocialLink(i, { label: e.target.value })} className="admin-input" placeholder="Twitter" />
                       </Field>
@@ -426,7 +426,7 @@ export default function SiteContentPage() {
             <p className="text-xs tracking-widest uppercase text-malamaya-light">
               Add New Lamp Word
             </p>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <Field label="Secret Word">
                 <input
                   type="text"
@@ -474,7 +474,7 @@ export default function SiteContentPage() {
                     key={lw.id}
                     className="border border-malamaya-border/20 rounded-sm p-4"
                   >
-                    <div className="grid grid-cols-2 gap-3 mb-3">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
                       <Field label="Word">
                         <input
                           type="text"

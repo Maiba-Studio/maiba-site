@@ -161,7 +161,7 @@ export default function ContactSection() {
           <p className="text-malamaya text-xs tracking-widest uppercase mb-6 text-center">
             Find us in the periphery
           </p>
-          <div className="flex justify-center gap-8">
+          <div className="flex flex-wrap justify-center gap-4 sm:gap-8">
             {content.socialLinks.map((link) => (
               <a
                 key={link.label}

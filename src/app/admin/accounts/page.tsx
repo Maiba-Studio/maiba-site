@@ -191,12 +191,12 @@ export default function AccountsPage() {
         </p>
       </div>
 
-      <div className="flex gap-1 mb-8 border-b border-malamaya-border/20">
+      <div className="flex gap-1 mb-8 border-b border-malamaya-border/20 overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0 scrollbar-none">
         {tabs.map((tab) => (
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
-            className={`px-5 py-3 text-sm tracking-widest uppercase transition-colors border-b-2 -mb-px ${
+            className={`px-3 sm:px-5 py-3 text-xs sm:text-sm tracking-widest uppercase transition-colors border-b-2 -mb-px whitespace-nowrap ${
               activeTab === tab.id
                 ? "border-maiba-red text-maiba-red"
                 : "border-transparent text-malamaya hover:text-foreground"
@@ -269,7 +269,7 @@ export default function AccountsPage() {
               Moderators can only access Field Notes for editing. They cannot edit Site Content or manage accounts.
             </p>
             <form onSubmit={handleCreateModerator} className="max-w-md space-y-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <Field label="Username">
                   <input
                     type="text"
@@ -318,9 +318,9 @@ export default function AccountsPage() {
                 {users.map((user) => (
                   <div
                     key={user.id}
-                    className="flex items-center justify-between border border-malamaya-border/20 rounded-sm px-5 py-3"
+                    className="flex flex-col sm:flex-row sm:items-center justify-between border border-malamaya-border/20 rounded-sm px-4 sm:px-5 py-3 gap-2"
                   >
-                    <div>
+                    <div className="min-w-0">
                       <span className="text-foreground text-sm">
                         {user.username}
                       </span>
@@ -334,7 +334,7 @@ export default function AccountsPage() {
                         {user.role}
                       </span>
                     </div>
-                    <div className="flex gap-3">
+                    <div className="flex gap-3 flex-shrink-0">
                       <button
                         onClick={() => openEdit(user)}
                         className="text-[10px] tracking-widest uppercase text-malamaya hover:text-foreground transition-colors"
@@ -358,8 +358,8 @@ export default function AccountsPage() {
 
       {/* Edit modal */}
       {editing && (
-        <div className="fixed inset-0 z-50 bg-black/70 flex items-center justify-center p-6">
-          <div className="bg-midnight border border-malamaya-border/30 rounded-sm p-6 w-full max-w-md">
+        <div className="fixed inset-0 z-50 bg-black/70 flex items-center justify-center p-4 sm:p-6">
+          <div className="bg-midnight border border-malamaya-border/30 rounded-sm p-5 sm:p-6 w-full max-w-md">
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-sm tracking-widest uppercase text-malamaya-light">
                 Edit {editing.role}: {editing.username}

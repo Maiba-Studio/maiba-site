@@ -208,9 +208,9 @@ export default function ArchiveSection() {
                         transition={{ duration: 0.3 }}
                       />
 
-                      <div className="relative z-10 flex gap-6 items-start">
+                      <div className="relative z-10 flex flex-col sm:flex-row gap-4 sm:gap-6 items-start">
                         {entry.thumbnail && (
-                          <div className="w-28 h-28 md:w-36 md:h-36 flex-shrink-0 rounded-sm overflow-hidden bg-malamaya-border/20">
+                          <div className="w-full sm:w-28 h-40 sm:h-28 md:w-36 md:h-36 flex-shrink-0 rounded-sm overflow-hidden bg-malamaya-border/20">
                             <img
                               src={entry.thumbnail}
                               alt=""

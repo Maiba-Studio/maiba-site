@@ -64,7 +64,7 @@ export default function RichTextEditor({ content, onChange, placeholder }: Props
     editorProps: {
       attributes: {
         class:
-          "min-h-[300px] px-4 py-3 text-foreground text-sm leading-7 focus:outline-none prose-headings:font-display prose-headings:text-foreground prose-p:text-malamaya-light prose-a:text-maiba-red prose-strong:text-foreground prose-blockquote:border-malamaya-border prose-blockquote:text-malamaya-light prose-code:text-maiba-red prose-code:bg-malamaya-border/20 prose-code:px-1 prose-code:rounded-sm prose-hr:border-malamaya-border/30 prose-img:rounded-sm prose-img:border prose-img:border-malamaya-border/20",
+          "min-h-[200px] sm:min-h-[300px] px-3 sm:px-4 py-3 text-foreground text-sm leading-7 focus:outline-none prose-headings:font-display prose-headings:text-foreground prose-p:text-malamaya-light prose-a:text-maiba-red prose-strong:text-foreground prose-blockquote:border-malamaya-border prose-blockquote:text-malamaya-light prose-code:text-maiba-red prose-code:bg-malamaya-border/20 prose-code:px-1 prose-code:rounded-sm prose-hr:border-malamaya-border/30 prose-img:rounded-sm prose-img:border prose-img:border-malamaya-border/20",
       },
     },
   });

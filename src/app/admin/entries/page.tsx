@@ -22,7 +22,10 @@ export default function EntriesPage() {
   const [loading, setLoading] = useState(true);
 
   const loadEntries = async () => {
-    const res = await fetch("/api/entries?all=true", { credentials: "include" });
+    const res = await fetch(`/api/entries?all=true&_t=${Date.now()}`, {
+      credentials: "include",
+      cache: "no-store",
+    });
     const data = await res.json();
     setEntries(data);
     setLoading(false);
@@ -41,20 +44,32 @@ export default function EntriesPage() {
     loadEntries();
   };
 
-  const handleTogglePublish = async (entry: FieldNote) => {
+  const handleTogglePublish = async (id: string, currentlyPublished: boolean) => {
+    const newState = !currentlyPublished;
+    setEntries((prev) =>
+      prev.map((e) => (e.id === id ? { ...e, published: newState } : e))
+    );
     try {
-      const res = await fetch(`/api/entries/${entry.id}`, {
+      const res = await fetch(`/api/entries/${id}`, {
         method: "PUT",
         credentials: "include",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ published: !entry.published }),
+        body: JSON.stringify({ published: newState }),
       });
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
         alert(data.error || "Failed to update publish state");
+        setEntries((prev) =>
+          prev.map((e) => (e.id === id ? { ...e, published: currentlyPublished } : e))
+        );
+        return;
       }
     } catch {
       alert("Connection failed");
+      setEntries((prev) =>
+        prev.map((e) => (e.id === id ? { ...e, published: currentlyPublished } : e))
+      );
+      return;
     }
     loadEntries();
   };
@@ -86,9 +101,9 @@ export default function EntriesPage() {
 
   return (
     <AdminShell>
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
         <div>
-          <h1 className="font-display text-3xl text-foreground">
+          <h1 className="font-display text-2xl sm:text-3xl text-foreground">
             Field Notes
           </h1>
           <p className="text-malamaya text-sm mt-1">
@@ -97,7 +112,7 @@ export default function EntriesPage() {
         </div>
         <button
           onClick={() => setCreating(true)}
-          className="bg-maiba-red/10 border border-maiba-red/30 text-maiba-red px-5 py-2.5 rounded-sm hover:bg-maiba-red/20 transition-colors text-sm tracking-widest uppercase"
+          className="bg-maiba-red/10 border border-maiba-red/30 text-maiba-red px-5 py-2.5 rounded-sm hover:bg-maiba-red/20 transition-colors text-sm tracking-widest uppercase self-start sm:self-auto"
         >
           + New Entry
         </button>
@@ -112,60 +127,62 @@ export default function EntriesPage() {
           {entries.map((entry) => (
             <div
               key={entry.id}
-              className="border border-malamaya-border/20 rounded-sm p-5 flex items-start justify-between gap-4 hover:border-malamaya-border/40 transition-colors"
+              className="border border-malamaya-border/20 rounded-sm p-4 sm:p-5 hover:border-malamaya-border/40 transition-colors"
             >
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-3 mb-2">
-                  <span
-                    className={`text-[10px] tracking-widest uppercase px-2 py-0.5 border rounded-sm ${tagColors[entry.tag] || "text-malamaya border-malamaya-border"}`}
-                  >
-                    {entry.tag}
-                  </span>
-                  <span className="text-malamaya-border text-xs">
-                    {entry.date}
-                  </span>
-                  {!entry.published && (
-                    <span className="text-[10px] tracking-widest uppercase text-amber-500 border border-amber-500/30 px-2 py-0.5 rounded-sm">
-                      Draft
+              <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 sm:gap-4">
+                <div className="flex-1 min-w-0">
+                  <div className="flex flex-wrap items-center gap-2 sm:gap-3 mb-2">
+                    <span
+                      className={`text-[10px] tracking-widest uppercase px-2 py-0.5 border rounded-sm ${tagColors[entry.tag] || "text-malamaya border-malamaya-border"}`}
+                    >
+                      {entry.tag}
                     </span>
+                    <span className="text-malamaya-border text-xs">
+                      {entry.date}
+                    </span>
+                    {!entry.published && (
+                      <span className="text-[10px] tracking-widest uppercase text-amber-500 border border-amber-500/30 px-2 py-0.5 rounded-sm">
+                        Draft
+                      </span>
+                    )}
+                  </div>
+                  <h3 className="text-foreground font-display text-base sm:text-lg truncate">
+                    {entry.title}
+                  </h3>
+                  <p className="text-malamaya text-sm mt-1 line-clamp-2 sm:truncate">
+                    {entry.excerpt}
+                  </p>
+                  {entry.seoTags && entry.seoTags.length > 0 && (
+                    <div className="flex flex-wrap gap-1.5 mt-2">
+                      {entry.seoTags.map((t, i) => (
+                        <span key={i} className="text-[10px] text-maiba-red/70 border border-maiba-red/15 px-1.5 py-0.5 rounded-sm">
+                          #{t}
+                        </span>
+                      ))}
+                    </div>
                   )}
                 </div>
-                <h3 className="text-foreground font-display text-lg truncate">
-                  {entry.title}
-                </h3>
-                <p className="text-malamaya text-sm mt-1 truncate">
-                  {entry.excerpt}
-                </p>
-                {entry.seoTags && entry.seoTags.length > 0 && (
-                  <div className="flex flex-wrap gap-1.5 mt-2">
-                    {entry.seoTags.map((t, i) => (
-                      <span key={i} className="text-[10px] text-maiba-red/70 border border-maiba-red/15 px-1.5 py-0.5 rounded-sm">
-                        #{t}
-                      </span>
-                    ))}
-                  </div>
-                )}
-              </div>
 
-              <div className="flex items-center gap-2 flex-shrink-0">
-                <button
-                  onClick={() => handleTogglePublish(entry)}
-                  className="text-xs px-3 py-1.5 border border-malamaya-border/30 rounded-sm text-malamaya hover:text-foreground hover:border-malamaya transition-colors"
-                >
-                  {entry.published ? "Unpublish" : "Publish"}
-                </button>
-                <button
-                  onClick={() => setEditing(entry)}
-                  className="text-xs px-3 py-1.5 border border-malamaya-border/30 rounded-sm text-malamaya hover:text-foreground hover:border-malamaya transition-colors"
-                >
-                  Edit
-                </button>
-                <button
-                  onClick={() => handleDelete(entry.id)}
-                  className="text-xs px-3 py-1.5 border border-maiba-red/20 rounded-sm text-maiba-red/60 hover:text-maiba-red hover:border-maiba-red/40 transition-colors"
-                >
-                  Delete
-                </button>
+                <div className="flex items-center gap-2 flex-shrink-0">
+                  <button
+                    onClick={() => handleTogglePublish(entry.id, entry.published)}
+                    className="text-xs px-3 py-1.5 border border-malamaya-border/30 rounded-sm text-malamaya hover:text-foreground hover:border-malamaya transition-colors"
+                  >
+                    {entry.published ? "Unpublish" : "Publish"}
+                  </button>
+                  <button
+                    onClick={() => setEditing(entry)}
+                    className="text-xs px-3 py-1.5 border border-malamaya-border/30 rounded-sm text-malamaya hover:text-foreground hover:border-malamaya transition-colors"
+                  >
+                    Edit
+                  </button>
+                  <button
+                    onClick={() => handleDelete(entry.id)}
+                    className="text-xs px-3 py-1.5 border border-maiba-red/20 rounded-sm text-maiba-red/60 hover:text-maiba-red hover:border-maiba-red/40 transition-colors"
+                  >
+                    Delete
+                  </button>
+                </div>
               </div>
             </div>
           ))}

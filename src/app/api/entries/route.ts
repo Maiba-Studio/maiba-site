@@ -8,7 +8,11 @@ export async function GET(req: NextRequest) {
 
   const entries =
     isAdmin && showAll ? await getEntries() : await getPublishedEntries();
-  return NextResponse.json(entries);
+  return NextResponse.json(entries, {
+    headers: {
+      "Cache-Control": "no-store, no-cache, must-revalidate",
+    },
+  });
 }
 
 export async function POST(req: NextRequest) {

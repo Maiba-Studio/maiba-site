@@ -11,7 +11,11 @@ export async function GET(
   if (!entry) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
-  return NextResponse.json(entry);
+  return NextResponse.json(entry, {
+    headers: {
+      "Cache-Control": "no-store, no-cache, must-revalidate",
+    },
+  });
 }
 
 export async function PUT(

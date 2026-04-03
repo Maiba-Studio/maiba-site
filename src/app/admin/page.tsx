@@ -79,16 +79,16 @@ export default function AdminDashboard() {
           </div>
 
           {/* Quick actions */}
-          <div className="mt-8 flex gap-4">
+          <div className="mt-8 flex flex-col sm:flex-row gap-3 sm:gap-4">
             <a
               href="/admin/entries?new=true"
-              className="bg-maiba-red/10 border border-maiba-red/30 text-maiba-red px-6 py-3 rounded-sm hover:bg-maiba-red/20 transition-colors text-sm tracking-widest uppercase"
+              className="bg-maiba-red/10 border border-maiba-red/30 text-maiba-red px-6 py-3 rounded-sm hover:bg-maiba-red/20 transition-colors text-sm tracking-widest uppercase text-center"
             >
               + New Entry
             </a>
             <a
               href="/admin/site"
-              className="border border-malamaya-border/30 text-malamaya px-6 py-3 rounded-sm hover:border-malamaya hover:text-foreground transition-colors text-sm tracking-widest uppercase"
+              className="border border-malamaya-border/30 text-malamaya px-6 py-3 rounded-sm hover:border-malamaya hover:text-foreground transition-colors text-sm tracking-widest uppercase text-center"
             >
               Edit Site Content
             </a>
