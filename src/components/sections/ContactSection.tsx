@@ -47,6 +47,10 @@ export default function ContactSection() {
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
   const [content, setContent] = useState<ContactContent>(defaults);
+  const nameValue = name.trim();
+  const emailValue = email.trim();
+  const messageValue = message.trim();
+  const canSubmit = Boolean(nameValue && emailValue && messageValue);
 
   useEffect(() => {
     fetch("/api/site-content")
@@ -76,6 +80,12 @@ export default function ContactSection() {
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setError("");
+
+    if (!canSubmit) {
+      setError("Please fill out all fields before sending.");
+      return;
+    }
+
     setSending(true);
 
     try {
@@ -84,7 +94,12 @@ export default function ContactSection() {
       const res = await fetch("/api/contact", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, message, captchaToken }),
+        body: JSON.stringify({
+          name: nameValue,
+          email: emailValue,
+          message: messageValue,
+          captchaToken,
+        }),
       });
 
       if (res.ok) {
@@ -189,9 +204,9 @@ export default function ContactSection() {
 
             <motion.button
               type="submit"
-              disabled={sending}
-              whileHover={sending ? {} : { scale: 1.02 }}
-              whileTap={sending ? {} : { scale: 0.98 }}
+              disabled={sending || !canSubmit}
+              whileHover={sending || !canSubmit ? {} : { scale: 1.02 }}
+              whileTap={sending || !canSubmit ? {} : { scale: 0.98 }}
               className="group flex items-center gap-3 bg-maiba-red/10 border border-maiba-red/30 text-maiba-red px-8 py-4 rounded-sm hover:bg-maiba-red/20 transition-colors w-full justify-center disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {sending ? (
