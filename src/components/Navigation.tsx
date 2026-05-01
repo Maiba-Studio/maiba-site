@@ -55,8 +55,9 @@ export default function Navigation() {
       }`}
     >
       <div className="max-w-7xl mx-auto px-6 py-5 flex items-center justify-between">
-        <button
-          onClick={() => scrollTo("#home")}
+        <a
+          href="https://www.maiba.studio/"
+          aria-label="Go to Maiba Studio home"
           className="hover:opacity-80 transition-opacity duration-500"
         >
           <Image
@@ -67,7 +68,7 @@ export default function Navigation() {
             className="h-8 w-auto"
             priority
           />
-        </button>
+        </a>
 
         {/* Desktop nav */}
         <div className="hidden md:flex items-center gap-8">

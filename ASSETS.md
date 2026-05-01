@@ -14,7 +14,7 @@ All placeholder assets live in `public/` and `public/images/`. Replace each plac
 | **Used in** | Navigation bar, Admin sidebar |
 | **Recommended format** | SVG (preferred) or PNG with transparency |
 | **Recommended dimensions** | 200×60px (SVG scales; if PNG, export at 2× = 400×120px) |
-| **Dark variant** | `public/logo-light.png` — red wordmark for dark backgrounds (currently used site-wide) |
+| **Dark variant** | `public/logo-light.png` — transparent red wordmark for dark backgrounds (currently used site-wide) |
 | **Alt text (SEO)** | `"Maiba Studio — Deviant creative studio"` |
 | **Notes** | SVG is ideal for sharp rendering at all sizes. If using PNG, ensure transparent background. The logo appears in the top-left navigation at ~32px height. |
 
