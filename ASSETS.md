@@ -10,11 +10,11 @@ All placeholder assets live in `public/` and `public/images/`. Replace each plac
 
 | Property | Value |
 |----------|-------|
-| **Placeholder** | `public/logo.svg` |
+| **Production file** | `public/logo.png` |
 | **Used in** | Navigation bar, Admin sidebar |
 | **Recommended format** | SVG (preferred) or PNG with transparency |
 | **Recommended dimensions** | 200×60px (SVG scales; if PNG, export at 2× = 400×120px) |
-| **Dark variant** | `public/logo-light.svg` — light-colored version for dark backgrounds (currently used site-wide) |
+| **Dark variant** | `public/logo-light.png` — red wordmark for dark backgrounds (currently used site-wide) |
 | **Alt text (SEO)** | `"Maiba Studio — Deviant creative studio"` |
 | **Notes** | SVG is ideal for sharp rendering at all sizes. If using PNG, ensure transparent background. The logo appears in the top-left navigation at ~32px height. |
 
@@ -22,11 +22,12 @@ All placeholder assets live in `public/` and `public/images/`. Replace each plac
 
 | Property | Value |
 |----------|-------|
-| **Placeholder** | `public/logo-icon.svg` |
+| **Production file** | `public/logo-icon.png` |
+| **Source file** | `public/logo-pfp.png` |
 | **Used for** | Brand mark, future social profile, app shortcuts |
 | **Recommended format** | SVG or PNG |
 | **Recommended dimensions** | 64×64px (if PNG, export at 4× = 256×256px) |
-| **Notes** | Square aspect ratio. The "M" monogram or moth symbol works well here. |
+| **Notes** | Square PFP lockup with the moth mark and Maiba Studio wordmark on a dark background. |
 
 ---
 
@@ -36,7 +37,8 @@ All placeholder assets live in `public/` and `public/images/`. Replace each plac
 
 | Property | Value |
 |----------|-------|
-| **Placeholder** | `public/favicon.svg` |
+| **Production file** | `public/favicon.png` |
+| **Source file** | `public/logo-pfp.png` |
 | **Referenced in** | `src/app/layout.tsx` → `metadata.icons.icon` |
 | **Recommended format** | SVG (modern browsers) + ICO fallback for legacy |
 | **Recommended dimensions** | 32×32px (SVG scales; for ICO, include 16×16, 32×32, 48×48) |
@@ -50,7 +52,8 @@ All placeholder assets live in `public/` and `public/images/`. Replace each plac
 
 | Property | Value |
 |----------|-------|
-| **Placeholder** | `public/apple-touch-icon.svg` |
+| **Production file** | `public/apple-touch-icon.png` |
+| **Source file** | `public/logo-pfp.png` |
 | **Referenced in** | `src/app/layout.tsx` → `metadata.icons.apple` |
 | **Recommended format** | PNG (required by Apple) |
 | **Recommended dimensions** | 180×180px |
@@ -70,7 +73,7 @@ apple: "/apple-touch-icon.png",
 
 | Property | Value |
 |----------|-------|
-| **Placeholder** | `public/images/og-image-placeholder.png` |
+| **Production file** | `public/images/og-image.png` |
 | **Format** | PNG (1200×630px) |
 | **Referenced in** | `src/app/layout.tsx` → `metadata.openGraph.images` and `metadata.twitter.images` |
 | **Required dimensions** | **1200×630px** (OG standard) |
@@ -243,14 +246,16 @@ Ensure each page has exactly one H1. Field note detail pages should use the entr
 
 ```
 public/
-├── logo.svg                        ← Full horizontal logo (dark bg) — SVG
-├── logo-light.svg                  ← Full horizontal logo (transparent, for nav) — SVG
-├── logo-icon.svg                   ← Square icon/monogram — SVG
-├── favicon.svg                     ← Browser tab icon (32×32) — SVG
-├── apple-touch-icon.svg            ← iOS home screen icon (180×180) — SVG, replace with .png
+├── logo.png                        ← Maiba Studio wordmark — PNG
+├── logo-light.png                  ← Maiba Studio wordmark for dark backgrounds — PNG
+├── logo-full.png                   ← Full moth + wordmark lockup — PNG
+├── logo-compact.png                ← Compact full lockup — PNG
+├── logo-icon.png                   ← Square moth glyph icon — PNG
+├── favicon.png                     ← Browser tab icon — PNG
+├── apple-touch-icon.png            ← iOS home screen icon (180×180) — PNG
 ├── robots.txt                      ← Search engine crawler rules
 └── images/
-    ├── og-image-placeholder.png    ← Social share preview (1200×630) — PNG
+    ├── og-image.png                ← Social share preview (1200×630) — PNG
     ├── founder-placeholder.png     ← Founder profile (400×400) — PNG
     ├── alter-ego-placeholder.png   ← Alter ego profile (400×400) — PNG
     ├── thumbnail-placeholder.png   ← Field note thumbnail (600×400) — PNG

@@ -17,11 +17,11 @@ Everything still needed to get the site fully production-ready, organized by pri
 
 See `ASSETS.md` for full specs. Replace every placeholder with final production assets.
 
-- [ ] **Logo** — Replace `public/logo.svg` and `public/logo-light.svg` with final Maiba Studio wordmark/logo.
-- [ ] **Logo icon** — Replace `public/logo-icon.svg` with square monogram (moth mark or "M").
-- [ ] **Favicon** — Replace `public/favicon.svg`. Optionally generate a `favicon.ico` fallback via [realfavicongenerator.net](https://realfavicongenerator.net).
-- [ ] **Apple touch icon** — Replace `public/apple-touch-icon.svg` with a 180x180 PNG (`apple-touch-icon.png`), update the path in `src/app/layout.tsx`.
-- [ ] **OG image** — Design a 1200x630 social share preview image, replace `public/images/og-image-placeholder.png`, update path in `layout.tsx` if filename changes.
+- [x] **Logo** — Added final Maiba Studio wordmark files at `public/logo.png` and `public/logo-light.png`.
+- [x] **Logo icon** — Added the isolated moth glyph at `public/logo-icon.png`.
+- [x] **Favicon** — Added `public/favicon.png` from the isolated moth glyph.
+- [x] **Apple touch icon** — Added `public/apple-touch-icon.png` and updated the path in `src/app/layout.tsx`.
+- [x] **OG image** — Added `public/images/og-image.png` and updated the metadata paths in `src/app/layout.tsx`.
 - [ ] **Founder photo** — Replace `public/images/founder-placeholder.png` (400x400) or set URL via admin dashboard.
 - [ ] **Alter ego photo** — Replace `public/images/alter-ego-placeholder.png` (400x400) or set URL via admin dashboard.
 - [ ] **Field note thumbnails** — Replace `public/images/thumbnail-placeholder.png` or upload per-entry via admin (600x400, 3:2 ratio).

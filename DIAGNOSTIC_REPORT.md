@@ -81,8 +81,18 @@ The local Node/npm installation still prints an experimental CommonJS/ESM warnin
 - Added Article JSON-LD to field note detail pages.
 - Added Person JSON-LD to the orphan artist page.
 - Added `src/app/el/page.tsx` as the noindexed orphan EL Bonuan page.
+- Replaced the logo, icon, favicon, apple touch icon, and OG image placeholders with the provided Maiba Studio logo artwork.
+- Added production logo files:
+  - `public/logo.png`
+  - `public/logo-light.png`
+  - `public/logo-full.png`
+  - `public/logo-compact.png`
+  - `public/logo-pfp.png`
+  - `public/logo-icon.png`
+  - `public/favicon.png`
+  - `public/apple-touch-icon.png`
+  - `public/images/og-image.png`
 - Generated local placeholder PNG files for:
-  - `public/images/og-image-placeholder.png`
   - `public/images/founder-placeholder.png`
   - `public/images/alter-ego-placeholder.png`
   - `public/images/thumbnail-placeholder.png`
@@ -95,7 +105,7 @@ These items cannot be fully completed without accounts, final assets, production
 - Create the Google Form and provide the production form URL plus field IDs.
 - Test contact form delivery in production.
 - Verify password change in production after deploy.
-- Replace placeholder logos, favicon, apple touch icon, OG image, portraits, and thumbnails with final brand assets.
+- Replace portrait and field note thumbnail placeholders with final production imagery.
 - Populate final production copy and field note content in the admin dashboard.
 - Replace generic social URLs with final profile URLs.
 - Run Google Mobile-Friendly Test and external OG/Twitter card validators.
@@ -106,7 +116,7 @@ These items cannot be fully completed without accounts, final assets, production
 ## Residual Engineering Notes
 
 - The new rate limiter is in-memory. It is useful as an in-repo baseline, but distributed production deployments should use durable/shared rate limiting if traffic or abuse risk grows.
-- The generated placeholder PNGs prevent broken references, but they are not final production artwork.
+- The generated portrait and thumbnail placeholder PNGs prevent broken references, but they are not final production artwork.
 - The orphan `/el` page uses existing in-repo content and placeholder imagery. It is intentionally noindexed and not linked from navigation.
 - The contact endpoint now fails closed in production when required integrations are missing. Make sure the production environment variables are present before launch.
 

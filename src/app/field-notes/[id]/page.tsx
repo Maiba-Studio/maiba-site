@@ -86,7 +86,7 @@ export default function FieldNotePage() {
       name: "Maiba Studio",
       logo: {
         "@type": "ImageObject",
-        url: "https://maiba.studio/logo.svg",
+        url: "https://maiba.studio/logo-icon.png",
       },
     },
   };

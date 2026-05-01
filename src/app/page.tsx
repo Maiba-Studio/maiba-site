@@ -11,7 +11,7 @@ export default function Home() {
     "@type": "Organization",
     name: "Maiba Studio",
     url: "https://maiba.studio",
-    logo: "https://maiba.studio/logo.svg",
+    logo: "https://maiba.studio/logo-icon.png",
     founder: {
       "@type": "Person",
       name: "EL Bonuan",

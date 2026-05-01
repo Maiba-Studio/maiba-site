@@ -53,7 +53,7 @@ export default function AdminShell({ children }: { children: ReactNode }) {
       <div className="px-5 py-6 border-b border-malamaya-border/20 flex items-center justify-between">
         <div>
           <Link href="/" className="block hover:opacity-80 transition-opacity">
-            <Image src="/logo-light.svg" alt="Maiba Studio" width={112} height={28} className="h-7 w-auto" priority />
+            <Image src="/logo-light.png" alt="Maiba Studio" width={124} height={56} className="h-7 w-auto" priority />
           </Link>
           <p className="text-[10px] tracking-[0.2em] uppercase text-malamaya mt-2">
             Studio Admin
@@ -116,7 +116,7 @@ export default function AdminShell({ children }: { children: ReactNode }) {
       {/* Mobile top bar */}
       <div className="md:hidden flex items-center justify-between px-4 py-3 border-b border-malamaya-border/20">
         <Link href="/" className="hover:opacity-80 transition-opacity">
-          <Image src="/logo-light.svg" alt="Maiba Studio" width={96} height={24} className="h-6 w-auto" priority />
+          <Image src="/logo-light.png" alt="Maiba Studio" width={107} height={48} className="h-6 w-auto" priority />
         </Link>
         <button
           onClick={() => setMobileOpen(true)}

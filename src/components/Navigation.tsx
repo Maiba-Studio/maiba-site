@@ -60,10 +60,10 @@ export default function Navigation() {
           className="hover:opacity-80 transition-opacity duration-500"
         >
           <Image
-            src="/logo-light.svg"
+            src="/logo-light.png"
             alt="Maiba Studio"
-            width={128}
-            height={32}
+            width={142}
+            height={64}
             className="h-8 w-auto"
             priority
           />
