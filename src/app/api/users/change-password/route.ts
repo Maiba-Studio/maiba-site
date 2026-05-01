@@ -7,9 +7,12 @@ import {
   setAdminPasswordHash,
 } from "@/lib/auth";
 import { getUserById, updateUser } from "@/lib/data";
+import { hasValidOrigin, invalidOriginResponse } from "@/lib/request-security";
 
 export async function POST(req: NextRequest) {
   try {
+    if (!hasValidOrigin(req)) return invalidOriginResponse();
+
     const session = await getSession();
     if (!session) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -23,9 +26,9 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    if (newPassword.length < 6) {
+    if (newPassword.length < 10) {
       return NextResponse.json(
-        { error: "Password must be at least 6 characters" },
+        { error: "Password must be at least 10 characters" },
         { status: 400 }
       );
     }

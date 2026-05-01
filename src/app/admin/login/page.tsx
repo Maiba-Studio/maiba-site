@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState, FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
@@ -96,12 +97,12 @@ export default function AdminLogin() {
         </form>
 
         <div className="mt-8 text-center">
-          <a
+          <Link
             href="/"
             className="text-malamaya-border text-xs hover:text-malamaya transition-colors tracking-widest uppercase"
           >
             ← Back to site
-          </a>
+          </Link>
         </div>
       </motion.div>
     </div>

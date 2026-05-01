@@ -44,8 +44,8 @@ Populate all sections with real copy via the Admin Dashboard.
 
 An orphan page at `/el` (or `/el-bonuan`) — not linked from the main navigation or landing page, accessible only by direct URL.
 
-- [ ] **Create the page** at `src/app/el/page.tsx` (or `src/app/el-bonuan/page.tsx`).
-- [ ] **Design the layout** — Artist portfolio/bio page with:
+- [x] **Create the page** at `src/app/el/page.tsx` (or `src/app/el-bonuan/page.tsx`).
+- [x] **Design the layout** — Artist portfolio/bio page with:
   - Hero/header with name, title, and a short personal statement
   - Profile photo (can reuse founder image or a separate one)
   - Bio section — longer personal narrative beyond what's on the About page
@@ -53,16 +53,16 @@ An orphan page at `/el` (or `/el-bonuan`) — not linked from the main navigatio
   - Skills/disciplines section (art direction, AI, Web3, interiors, etc.)
   - Links to external profiles (Behance, Dribbble, GitHub, etc.)
   - Contact or CTA (can link back to the main site's contact form)
-- [ ] **Keep it orphaned** — Do NOT add it to `Navigation.tsx`, `Footer.tsx`, or any visible link on the main site. It should only be reachable by typing the URL directly or sharing the link.
-- [ ] **Add `noindex` meta** (optional) — If you want it truly private, add `robots: { index: false }` to the page's metadata export. If you want it findable by search engines but just not linked from the site, leave it indexable.
+- [x] **Keep it orphaned** — Do NOT add it to `Navigation.tsx`, `Footer.tsx`, or any visible link on the main site. It should only be reachable by typing the URL directly or sharing the link.
+- [x] **Add `noindex` meta** (optional) — If you want it truly private, add `robots: { index: false }` to the page's metadata export. If you want it findable by search engines but just not linked from the site, leave it indexable.
 - [ ] **Consider making it admin-editable** (optional) — Add a new section in the admin dashboard or manage content via a separate JSON file in blob storage.
 
 ---
 
 ## 5. SEO & Technical Polish (Recommended)
 
-- [ ] **Generate a sitemap** — Create `src/app/sitemap.ts` that dynamically lists all public pages + published field notes. Exclude `/admin/*`, `/api/*`, and the orphan artist page (if noindexed).
-- [ ] **Add JSON-LD structured data** — Organization schema on the homepage, Article schema on field note pages, Person schema on the artist page.
+- [x] **Generate a sitemap** — Create `src/app/sitemap.ts` that dynamically lists all public pages + published field notes. Exclude `/admin/*`, `/api/*`, and the orphan artist page (if noindexed).
+- [x] **Add JSON-LD structured data** — Organization schema on the homepage, Article schema on field note pages, Person schema on the artist page.
 - [ ] **Run Lighthouse audit** — Target 90+ on Performance, Accessibility, Best Practices, SEO. Fix any issues found.
 - [ ] **Test with Google Mobile-Friendly Test** — Verify all public pages pass.
 - [ ] **Verify OG tags** — Use [opengraph.xyz](https://www.opengraph.xyz) or Twitter Card Validator to confirm social previews render correctly.
@@ -73,8 +73,8 @@ An orphan page at `/el` (or `/el-bonuan`) — not linked from the main navigatio
 
 ## 6. Security & Maintenance (Recommended)
 
-- [ ] **Review CORS / rate limiting** — The `/api/contact` endpoint is publicly accessible. Consider adding rate limiting (Vercel Edge Middleware or a simple in-memory counter) to prevent abuse.
-- [ ] **Audit admin routes** — Verify that all `/admin/*` pages and `/api/*` endpoints properly check authentication. Moderators should not access Site Content or Accounts.
+- [x] **Review CORS / rate limiting** — The `/api/contact` endpoint is publicly accessible. Consider adding rate limiting (Vercel Edge Middleware or a simple in-memory counter) to prevent abuse.
+- [x] **Audit admin routes** — Verify that all `/admin/*` pages and `/api/*` endpoints properly check authentication. Moderators should not access Site Content or Accounts.
 - [ ] **Set up Vercel Analytics** (optional) — Enable Web Analytics or Speed Insights in the Vercel dashboard for traffic and performance monitoring.
 - [ ] **Configure a custom domain** — If not already done, add `maiba.studio` as a custom domain in Vercel and configure DNS.
 - [ ] **Set up email forwarding** — Ensure `el@maiba.studio` and `hello@maiba.studio` are receiving mail if referenced in the contact section.

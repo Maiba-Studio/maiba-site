@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect, useCallback, useRef } from "react";
 import Link from "next/link";
@@ -57,11 +58,6 @@ export default function ArchiveSection() {
       : entries.filter((e) => e.tag === activeTag);
 
   const count = filtered.length;
-
-  useEffect(() => {
-    setCurrent(0);
-    setDirection(1);
-  }, [activeTag]);
 
   const advance = useCallback(() => {
     if (count <= 1) return;
@@ -143,7 +139,11 @@ export default function ArchiveSection() {
           {tags.map((tag) => (
             <button
               key={tag}
-              onClick={() => setActiveTag(tag)}
+              onClick={() => {
+                setActiveTag(tag);
+                setCurrent(0);
+                setDirection(1);
+              }}
               className={`text-xs tracking-widest uppercase px-4 py-2 border rounded-sm transition-all duration-300 ${
                 activeTag === tag
                   ? "border-maiba-red text-maiba-red bg-maiba-red/5"
@@ -211,9 +211,12 @@ export default function ArchiveSection() {
                       <div className="relative z-10 flex flex-col sm:flex-row gap-4 sm:gap-6 items-start">
                         {entry.thumbnail && (
                           <div className="w-full sm:w-28 h-40 sm:h-28 md:w-36 md:h-36 flex-shrink-0 rounded-sm overflow-hidden bg-malamaya-border/20">
-                            <img
+                            <Image
                               src={entry.thumbnail}
                               alt=""
+                              width={300}
+                              height={300}
+                              unoptimized={entry.thumbnail.startsWith("http")}
                               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                             />
                           </div>

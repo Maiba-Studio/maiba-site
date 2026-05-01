@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import SiX from "@icons-pack/react-simple-icons/icons/SiX.mjs";
 import SiInstagram from "@icons-pack/react-simple-icons/icons/SiInstagram.mjs";
 import SiFacebook from "@icons-pack/react-simple-icons/icons/SiFacebook.mjs";
@@ -102,9 +103,12 @@ export function SocialIconRenderer({
 }) {
   if (iconId === "custom" && customIconUrl) {
     return (
-      <img
+      <Image
         src={customIconUrl}
         alt=""
+        width={size}
+        height={size}
+        unoptimized={customIconUrl.startsWith("http")}
         className={className}
         style={{ width: size, height: size }}
       />

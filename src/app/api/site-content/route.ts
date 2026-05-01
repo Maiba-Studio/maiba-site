@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSession } from "@/lib/auth";
 import { getSiteContent, saveSiteContent } from "@/lib/data";
+import { hasValidOrigin, invalidOriginResponse } from "@/lib/request-security";
+import { parseSiteContent } from "@/lib/validation";
 
 export async function GET() {
   const content = await getSiteContent();
@@ -9,12 +11,18 @@ export async function GET() {
 
 export async function PUT(req: NextRequest) {
   try {
+    if (!hasValidOrigin(req)) return invalidOriginResponse();
+
     const session = await getSession();
     if (!session || session.role !== "admin") {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const data = await req.json();
+    const data = parseSiteContent(await req.json());
+    if (!data) {
+      return NextResponse.json({ error: "Invalid site content payload" }, { status: 400 });
+    }
+
     await saveSiteContent(data);
     return NextResponse.json({ success: true });
   } catch (err) {

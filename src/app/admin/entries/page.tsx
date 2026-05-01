@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import AdminShell from "@/components/admin/AdminShell";
 import EntryForm from "@/components/admin/EntryForm";
 import type { FieldNote } from "@/lib/data";
@@ -21,19 +21,28 @@ export default function EntriesPage() {
   const [creating, setCreating] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  const loadEntries = async () => {
+  const fetchEntries = useCallback(async () => {
     const res = await fetch(`/api/entries?all=true&_t=${Date.now()}`, {
       credentials: "include",
       cache: "no-store",
     });
-    const data = await res.json();
+    return (await res.json()) as FieldNote[];
+  }, []);
+
+  const loadEntries = async () => {
+    const data = await fetchEntries();
     setEntries(data);
     setLoading(false);
   };
 
   useEffect(() => {
-    loadEntries();
-  }, []);
+    fetchEntries()
+      .then((data) => {
+        setEntries(data);
+        setLoading(false);
+      })
+      .catch(() => setLoading(false));
+  }, [fetchEntries]);
 
   const handleDelete = async (id: string) => {
     if (!confirm("Delete this entry permanently?")) return;

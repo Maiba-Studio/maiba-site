@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSession } from "@/lib/auth";
 import { getLampWords, createLampWord } from "@/lib/data";
+import { hasValidOrigin, invalidOriginResponse } from "@/lib/request-security";
+import { parseLampWordInput } from "@/lib/validation";
 
 export async function GET() {
   const session = await getSession();
@@ -13,19 +15,21 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
+  if (!hasValidOrigin(req)) return invalidOriginResponse();
+
   const session = await getSession();
   if (!session || session.role !== "admin") {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const { word, link } = await req.json();
-  if (!word || !link) {
+  const payload = parseLampWordInput(await req.json());
+  if (!payload) {
     return NextResponse.json(
-      { error: "Word and link required" },
+      { error: "Valid word and link required" },
       { status: 400 }
     );
   }
 
-  const entry = await createLampWord(word, link);
+  const entry = await createLampWord(payload.word, payload.link);
   return NextResponse.json(entry, { status: 201 });
 }

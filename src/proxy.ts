@@ -3,7 +3,7 @@ import { jwtVerify } from "jose";
 
 const ADMIN_ONLY_PATHS = ["/admin/site", "/admin/accounts"];
 
-export async function middleware(req: NextRequest) {
+export async function proxy(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
   if (pathname.startsWith("/admin") && pathname !== "/admin/login") {
@@ -14,9 +14,16 @@ export async function middleware(req: NextRequest) {
     }
 
     try {
-      const secret = new TextEncoder().encode(process.env.JWT_SECRET);
+      const secretValue = process.env.JWT_SECRET;
+      if (!secretValue) throw new Error("JWT_SECRET not configured");
+
+      const secret = new TextEncoder().encode(secretValue);
       const { payload } = await jwtVerify(token, secret);
-      const role = (payload.role as string) || "admin";
+      const role = payload.role;
+
+      if (role !== "admin" && role !== "moderator") {
+        return NextResponse.redirect(new URL("/admin/login", req.url));
+      }
 
       if (
         role === "moderator" &&
@@ -37,3 +44,4 @@ export async function middleware(req: NextRequest) {
 export const config = {
   matcher: ["/admin/:path*"],
 };
+

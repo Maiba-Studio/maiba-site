@@ -1,13 +1,21 @@
 import { NextRequest, NextResponse } from "next/server";
+import {
+  getClientIp,
+  hasValidOrigin,
+  invalidOriginResponse,
+  rateLimit,
+  rateLimitResponse,
+} from "@/lib/request-security";
 
 const RECAPTCHA_SECRET = process.env.RECAPTCHA_SECRET_KEY || "";
 const GOOGLE_FORM_URL = process.env.GOOGLE_FORM_URL || "";
 const GOOGLE_FORM_NAME_FIELD = process.env.GOOGLE_FORM_NAME_FIELD || "";
 const GOOGLE_FORM_EMAIL_FIELD = process.env.GOOGLE_FORM_EMAIL_FIELD || "";
 const GOOGLE_FORM_MESSAGE_FIELD = process.env.GOOGLE_FORM_MESSAGE_FIELD || "";
+const IS_PRODUCTION = process.env.NODE_ENV === "production";
 
 async function verifyCaptcha(token: string): Promise<boolean> {
-  if (!RECAPTCHA_SECRET) return true;
+  if (!RECAPTCHA_SECRET) return !IS_PRODUCTION;
 
   try {
     const res = await fetch("https://www.google.com/recaptcha/api/siteverify", {
@@ -23,7 +31,15 @@ async function verifyCaptcha(token: string): Promise<boolean> {
 }
 
 async function submitToGoogleForm(name: string, email: string, message: string) {
-  if (!GOOGLE_FORM_URL || !GOOGLE_FORM_NAME_FIELD) return;
+  if (
+    !GOOGLE_FORM_URL ||
+    !GOOGLE_FORM_NAME_FIELD ||
+    !GOOGLE_FORM_EMAIL_FIELD ||
+    !GOOGLE_FORM_MESSAGE_FIELD
+  ) {
+    if (IS_PRODUCTION) throw new Error("Contact form is not configured");
+    return;
+  }
 
   const formData = new URLSearchParams();
   formData.append(GOOGLE_FORM_NAME_FIELD, name);
@@ -39,6 +55,15 @@ async function submitToGoogleForm(name: string, email: string, message: string) 
 
 export async function POST(req: NextRequest) {
   try {
+    if (!hasValidOrigin(req)) return invalidOriginResponse();
+
+    const ip = getClientIp(req);
+    const limited = rateLimit(`contact:${ip}`, {
+      windowMs: 10 * 60 * 1000,
+      max: 5,
+    });
+    if (!limited.ok) return rateLimitResponse(limited.retryAfter);
+
     const { name, email, message, captchaToken } = await req.json();
 
     if (!name || !email || !message) {
@@ -56,7 +81,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    if (RECAPTCHA_SECRET && !captchaToken) {
+    if ((RECAPTCHA_SECRET || IS_PRODUCTION) && !captchaToken) {
       return NextResponse.json(
         { error: "Captcha verification required" },
         { status: 400 }

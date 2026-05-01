@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useEffect, useState, FormEvent } from "react";
 import { ChevronUp, ChevronDown, GripVertical } from "lucide-react";
 import AdminShell from "@/components/admin/AdminShell";
@@ -276,7 +277,7 @@ export default function SiteContentPage() {
               </Field>
               {content.about.founderImage && (
                 <div className="flex items-center gap-4">
-                  <img src={content.about.founderImage} alt="Founder preview" className="w-16 h-16 rounded-full object-cover border border-malamaya-border/30" />
+                  <Image src={content.about.founderImage} alt="Founder preview" width={64} height={64} unoptimized={content.about.founderImage.startsWith("http")} className="w-16 h-16 rounded-full object-cover border border-malamaya-border/30" />
                   <span className="text-malamaya text-xs">Preview</span>
                 </div>
               )}
@@ -298,7 +299,7 @@ export default function SiteContentPage() {
               </Field>
               {content.about.alterEgoImage && (
                 <div className="flex items-center gap-4">
-                  <img src={content.about.alterEgoImage} alt="Alter ego preview" className="w-16 h-16 rounded-full object-cover border border-malamaya-border/30" />
+                  <Image src={content.about.alterEgoImage} alt="Alter ego preview" width={64} height={64} unoptimized={content.about.alterEgoImage.startsWith("http")} className="w-16 h-16 rounded-full object-cover border border-malamaya-border/30" />
                   <span className="text-malamaya text-xs">Preview</span>
                 </div>
               )}

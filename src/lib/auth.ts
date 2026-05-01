@@ -99,10 +99,22 @@ export async function verifySession(
 ): Promise<SessionPayload | null> {
   try {
     const { payload } = await jwtVerify(token, getSecret());
+    const role = payload.role;
+    const userId = payload.userId;
+    const username = payload.username;
+
+    if (
+      (role !== "admin" && role !== "moderator") ||
+      typeof userId !== "string" ||
+      typeof username !== "string"
+    ) {
+      return null;
+    }
+
     return {
-      role: (payload.role as UserRole) || "admin",
-      userId: (payload.userId as string) || "env-admin",
-      username: (payload.username as string) || "",
+      role,
+      userId,
+      username,
     };
   } catch {
     return null;
@@ -129,7 +141,13 @@ export async function setSessionCookie(token: string) {
 
 export async function clearSession() {
   const cookieStore = await cookies();
-  cookieStore.delete(SESSION_COOKIE);
+  cookieStore.set(SESSION_COOKIE, "", {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    maxAge: 0,
+    path: "/",
+  });
 }
 
 export async function hashPassword(password: string): Promise<string> {

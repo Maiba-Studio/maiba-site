@@ -1,7 +1,20 @@
 import { NextRequest, NextResponse } from "next/server";
 import { verifyCredentials, createSession, setSessionCookie } from "@/lib/auth";
+import {
+  getClientIp,
+  hasValidOrigin,
+  invalidOriginResponse,
+  rateLimit,
+  rateLimitResponse,
+} from "@/lib/request-security";
 
 export async function POST(req: NextRequest) {
+  if (!hasValidOrigin(req)) return invalidOriginResponse();
+
+  const ip = getClientIp(req);
+  const limited = rateLimit(`login:${ip}`, { windowMs: 15 * 60 * 1000, max: 20 });
+  if (!limited.ok) return rateLimitResponse(limited.retryAfter);
+
   const { username, password } = await req.json();
 
   if (!username || !password) {

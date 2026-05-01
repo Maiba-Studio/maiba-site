@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { motion } from "framer-motion";
+import Image from "next/image";
 import Link from "next/link";
 
 const tagColors: Record<string, string> = {
@@ -49,7 +50,7 @@ export default function FieldNotePage() {
       <div className="min-h-screen flex items-center justify-center px-6">
         <div className="text-center">
           <p className="font-display text-3xl mb-4">Lost in the dark</p>
-          <p className="text-malamaya text-sm mb-8">This field note doesn't exist or has been removed.</p>
+          <p className="text-malamaya text-sm mb-8">This field note does not exist or has been removed.</p>
           <Link
             href="/#archive"
             className="text-xs tracking-widest uppercase text-maiba-red hover:text-maiba-red/80 transition-colors"
@@ -69,8 +70,33 @@ export default function FieldNotePage() {
     );
   }
 
+  const articleJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    headline: entry.title,
+    description: entry.excerpt,
+    image: entry.thumbnail || undefined,
+    datePublished: entry.date,
+    author: {
+      "@type": "Organization",
+      name: "Maiba Studio",
+    },
+    publisher: {
+      "@type": "Organization",
+      name: "Maiba Studio",
+      logo: {
+        "@type": "ImageObject",
+        url: "https://maiba.studio/logo.svg",
+      },
+    },
+  };
+
   return (
     <div className="min-h-screen py-24 md:py-32 px-6">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(articleJsonLd) }}
+      />
       <div className="max-w-3xl mx-auto">
         {/* Back link */}
         <motion.div
@@ -128,9 +154,12 @@ export default function FieldNotePage() {
             transition={{ duration: 0.6, delay: 0.15 }}
             className="mb-12"
           >
-            <img
+            <Image
               src={entry.thumbnail}
               alt={entry.title}
+              width={1200}
+              height={800}
+              unoptimized={entry.thumbnail.startsWith("http")}
               className="w-full rounded-sm border border-malamaya-border/20"
             />
           </motion.div>

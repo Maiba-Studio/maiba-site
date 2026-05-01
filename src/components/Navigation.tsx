@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import MothModeToggle from "./MothModeToggle";
@@ -58,10 +59,13 @@ export default function Navigation() {
           onClick={() => scrollTo("#home")}
           className="hover:opacity-80 transition-opacity duration-500"
         >
-          <img
+          <Image
             src="/logo-light.svg"
             alt="Maiba Studio"
+            width={128}
+            height={32}
             className="h-8 w-auto"
+            priority
           />
         </button>
 

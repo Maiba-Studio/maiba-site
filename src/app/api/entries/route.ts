@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSession } from "@/lib/auth";
 import { getEntries, getPublishedEntries, createEntry } from "@/lib/data";
+import { hasValidOrigin, invalidOriginResponse } from "@/lib/request-security";
+import { parseFieldNoteInput } from "@/lib/validation";
 
 export async function GET(req: NextRequest) {
   const isAdmin = await getSession();
@@ -17,12 +19,18 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
+    if (!hasValidOrigin(req)) return invalidOriginResponse();
+
     const isAdmin = await getSession();
     if (!isAdmin) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const data = await req.json();
+    const data = parseFieldNoteInput(await req.json());
+    if (!data) {
+      return NextResponse.json({ error: "Invalid field note payload" }, { status: 400 });
+    }
+
     const entry = await createEntry(data);
     return NextResponse.json(entry, { status: 201 });
   } catch (err) {
