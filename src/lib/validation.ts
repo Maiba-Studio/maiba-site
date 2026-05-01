@@ -1,7 +1,6 @@
 import type { FieldNote, LampWord, SiteContent, UserRole } from "@/lib/data";
 import { sanitizeRichText } from "@/lib/sanitize";
 
-const FIELD_NOTE_TAGS = ["drawing", "log", "code", "vision", "shadow"] as const;
 const USER_ROLES = ["admin", "moderator"] as const;
 
 type FieldNoteInput = Omit<FieldNote, "id" | "createdAt" | "updatedAt">;
@@ -17,6 +16,24 @@ function stringValue(value: unknown, fallback = ""): string {
 function stringArray(value: unknown): string[] {
   if (!Array.isArray(value)) return [];
   return value.filter((item): item is string => typeof item === "string").map((s) => s.trim()).filter(Boolean);
+}
+
+function normalizeTag(value: unknown): string {
+  return stringValue(value)
+    .toLowerCase()
+    .replace(/[^a-z0-9-_\s]/g, "")
+    .replace(/\s+/g, "-")
+    .slice(0, 40);
+}
+
+function normalizeSlug(value: unknown): string {
+  return stringValue(value)
+    .toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, "")
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "")
+    .slice(0, 80);
 }
 
 function isUserRole(value: unknown): value is UserRole {
@@ -44,9 +61,9 @@ export function parseFieldNoteInput(value: unknown): FieldNoteInput | null {
 
   const title = stringValue(value.title);
   const excerpt = stringValue(value.excerpt);
-  const tag = stringValue(value.tag);
+  const tag = normalizeTag(value.tag);
 
-  if (!title || !excerpt || !FIELD_NOTE_TAGS.includes(tag as FieldNoteInput["tag"])) {
+  if (!title || !excerpt || !tag) {
     return null;
   }
 
@@ -62,10 +79,11 @@ export function parseFieldNoteInput(value: unknown): FieldNoteInput | null {
 
   return {
     title,
+    slug: normalizeSlug(value.slug || title),
     headline: stringValue(value.headline),
     excerpt,
     body: sanitizeRichText(typeof value.body === "string" ? value.body : ""),
-    tag: tag as FieldNoteInput["tag"],
+    tag,
     date: stringValue(value.date, new Date().toISOString().slice(0, 10)),
     thumbnail: normalizeUrl(value.thumbnail),
     images: stringArray(value.images).map((url) => normalizeUrl(url)).filter(Boolean),
@@ -81,13 +99,14 @@ export function parseFieldNotePatch(value: unknown): Partial<Omit<FieldNote, "id
   const patch: Partial<Omit<FieldNote, "id" | "createdAt">> = {};
 
   if ("title" in value) patch.title = stringValue(value.title);
+  if ("slug" in value) patch.slug = normalizeSlug(value.slug);
   if ("headline" in value) patch.headline = stringValue(value.headline);
   if ("excerpt" in value) patch.excerpt = stringValue(value.excerpt);
   if ("body" in value) patch.body = sanitizeRichText(typeof value.body === "string" ? value.body : "");
   if ("tag" in value) {
-    const tag = stringValue(value.tag);
-    if (!FIELD_NOTE_TAGS.includes(tag as FieldNote["tag"])) return null;
-    patch.tag = tag as FieldNote["tag"];
+    const tag = normalizeTag(value.tag);
+    if (!tag) return null;
+    patch.tag = tag;
   }
   if ("date" in value) patch.date = stringValue(value.date);
   if ("thumbnail" in value) patch.thumbnail = normalizeUrl(value.thumbnail);
@@ -172,9 +191,17 @@ export function parseSiteContent(value: unknown): SiteContent | null {
       ethosTitle: stringValue(content.about.ethosTitle),
       ethosList: stringArray(content.about.ethosList),
     },
+    archive: {
+      title: stringValue(content.archive?.title),
+      subtitle: stringValue(content.archive?.subtitle),
+      emptyText: stringValue(content.archive?.emptyText),
+      noTagText: stringValue(content.archive?.noTagText),
+      tags: stringArray(content.archive?.tags).map(normalizeTag).filter(Boolean),
+    },
     contact: {
       title: stringValue(content.contact.title),
       subtitle: stringValue(content.contact.subtitle),
+      socialTitle: stringValue(content.contact.socialTitle),
       socialLinks: Array.isArray(content.contact.socialLinks)
         ? content.contact.socialLinks
             .filter(isRecord)
@@ -183,6 +210,7 @@ export function parseSiteContent(value: unknown): SiteContent | null {
               href: normalizeUrl(link.href),
               icon: normalizeUrl(link.icon),
               iconId: stringValue(link.iconId),
+              showLabel: link.showLabel !== false,
             }))
             .filter((link) => link.label && link.href)
         : [],

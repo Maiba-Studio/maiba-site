@@ -5,33 +5,49 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect, useCallback, useRef } from "react";
 import Link from "next/link";
 
-type Tag = "all" | "drawing" | "log" | "code" | "vision" | "shadow";
-
 interface Entry {
   id: string;
+  slug?: string;
   title: string;
   headline: string;
   excerpt: string;
-  tag: Exclude<Tag, "all">;
+  tag: string;
   date: string;
   thumbnail?: string;
+}
+
+interface ArchiveContent {
+  title: string;
+  subtitle: string;
+  emptyText: string;
+  noTagText: string;
+  tags: string[];
 }
 
 const tagColors: Record<string, string> = {
   drawing: "text-amber-400 border-amber-400/30",
   log: "text-emerald-400 border-emerald-400/30",
   code: "text-sky-400 border-sky-400/30",
+  create: "text-pink-400 border-pink-400/30",
   vision: "text-maiba-red border-maiba-red/30",
   shadow: "text-purple-400 border-purple-400/30",
 };
 
 const INTERVAL = 5200;
 const POLL_INTERVAL = 15000;
-const tags: Tag[] = ["all", "drawing", "log", "code", "vision", "shadow"];
+const defaultArchive: ArchiveContent = {
+  title: "Field Notes",
+  subtitle:
+    "What doesn't make it into the work... becomes the work.\nThese are the scattered sparks. The light between things.",
+  emptyText: "No field notes yet. The sparks are gathering...",
+  noTagText: "No notes found for this tag.",
+  tags: ["drawing", "log", "code", "create", "vision", "shadow"],
+};
 
 export default function ArchiveSection() {
   const [entries, setEntries] = useState<Entry[]>([]);
-  const [activeTag, setActiveTag] = useState<Tag>("all");
+  const [content, setContent] = useState<ArchiveContent>(defaultArchive);
+  const [activeTag, setActiveTag] = useState("all");
   const [current, setCurrent] = useState(0);
   const [direction, setDirection] = useState(1);
   const [paused, setPaused] = useState(false);
@@ -51,6 +67,17 @@ export default function ArchiveSection() {
     const poll = setInterval(fetchEntries, POLL_INTERVAL);
     return () => clearInterval(poll);
   }, [fetchEntries]);
+
+  useEffect(() => {
+    fetch("/api/site-content")
+      .then((r) => r.json())
+      .then((data) => {
+        if (data.archive) setContent({ ...defaultArchive, ...data.archive });
+      })
+      .catch(() => {});
+  }, []);
+
+  const tags = ["all", ...content.tags];
 
   const filtered =
     activeTag === "all"
@@ -119,12 +146,10 @@ export default function ArchiveSection() {
           className="mb-16"
         >
           <h2 className="font-display text-4xl md:text-5xl mb-6">
-            Field Notes
+            {content.title}
           </h2>
-          <p className="font-accent italic text-malamaya-light text-lg max-w-lg">
-            What doesn&apos;t make it into the work... becomes the work.
-            <br />
-            These are the scattered sparks. The light between things.
+          <p className="font-accent italic text-malamaya-light text-lg max-w-lg whitespace-pre-line">
+            {content.subtitle}
           </p>
         </motion.div>
 
@@ -199,7 +224,7 @@ export default function ArchiveSection() {
                   transition={{ duration: 0.45, ease: "easeInOut" }}
                   className="w-full"
                 >
-                  <Link href={`/field-notes/${entry.id}`} className="block group">
+                  <Link href={`/field-notes/${entry.slug || entry.id}`} className="block group">
                     <div className="border border-malamaya-border/30 rounded-sm bg-midnight/50 p-6 md:p-8 relative overflow-hidden">
                       <motion.div
                         className="absolute inset-0 bg-maiba-red/[0.02]"
@@ -299,11 +324,11 @@ export default function ArchiveSection() {
           </div>
         ) : entries.length === 0 ? (
           <p className="text-malamaya text-sm text-center py-12">
-            No field notes yet. The sparks are gathering...
+            {content.emptyText}
           </p>
         ) : (
           <p className="text-malamaya text-sm text-center py-12">
-            No notes found for this tag.
+            {content.noTagText}
           </p>
         )}
       </div>

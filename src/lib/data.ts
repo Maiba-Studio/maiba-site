@@ -3,11 +3,12 @@ import { readJSON, writeJSON } from "./storage";
 
 export interface FieldNote {
   id: string;
+  slug?: string;
   title: string;
   headline: string;
   excerpt: string;
   body: string;
-  tag: "drawing" | "log" | "code" | "vision" | "shadow";
+  tag: string;
   date: string;
   thumbnail: string;
   images: string[];
@@ -23,6 +24,7 @@ export interface SocialLink {
   href: string;
   icon: string;
   iconId?: string;
+  showLabel?: boolean;
 }
 
 export interface SiteContent {
@@ -48,9 +50,17 @@ export interface SiteContent {
     ethosTitle: string;
     ethosList: string[];
   };
+  archive: {
+    title: string;
+    subtitle: string;
+    emptyText: string;
+    noTagText: string;
+    tags: string[];
+  };
   contact: {
     title: string;
     subtitle: string;
+    socialTitle: string;
     socialLinks: SocialLink[];
   };
   ritual: {
@@ -91,7 +101,7 @@ export async function getPublishedEntries(): Promise<FieldNote[]> {
 
 export async function getEntry(id: string): Promise<FieldNote | null> {
   const entries = await getEntries();
-  return entries.find((e) => e.id === id) ?? null;
+  return entries.find((e) => e.id === id || e.slug === id) ?? null;
 }
 
 export async function saveEntries(entries: FieldNote[]) {
@@ -106,6 +116,7 @@ export async function createEntry(
   const entry: FieldNote = {
     ...data,
     id: uuid(),
+    slug: uniqueSlug(data.slug || data.title, entries),
     createdAt: now,
     updatedAt: now,
   };
@@ -119,11 +130,15 @@ export async function updateEntry(
   data: Partial<Omit<FieldNote, "id" | "createdAt">>
 ): Promise<FieldNote | null> {
   const entries = await getEntries();
-  const idx = entries.findIndex((e) => e.id === id);
+  const idx = entries.findIndex((e) => e.id === id || e.slug === id);
   if (idx === -1) return null;
+  const slug = data.slug
+    ? uniqueSlug(data.slug, entries.filter((entry) => entry.id !== entries[idx].id))
+    : entries[idx].slug;
   entries[idx] = {
     ...entries[idx],
     ...data,
+    slug,
     updatedAt: new Date().toISOString(),
   };
   await saveEntries(entries);
@@ -132,7 +147,7 @@ export async function updateEntry(
 
 export async function deleteEntry(id: string): Promise<boolean> {
   const entries = await getEntries();
-  const filtered = entries.filter((e) => e.id !== id);
+  const filtered = entries.filter((e) => e.id !== id && e.slug !== id);
   if (filtered.length === entries.length) return false;
   await saveEntries(filtered);
   return true;
@@ -141,11 +156,33 @@ export async function deleteEntry(id: string): Promise<boolean> {
 // --- Site Content ---
 
 export async function getSiteContent(): Promise<SiteContent> {
-  return readJSON<SiteContent>("site-content.json", getDefaultSiteContent());
+  const defaults = getDefaultSiteContent();
+  const saved = await readJSON<Partial<SiteContent>>("site-content.json", defaults);
+  return {
+    ...defaults,
+    ...saved,
+    hero: { ...defaults.hero, ...saved.hero },
+    about: { ...defaults.about, ...saved.about },
+    archive: { ...defaults.archive, ...saved.archive },
+    contact: {
+      ...defaults.contact,
+      ...saved.contact,
+      socialLinks: (saved.contact?.socialLinks ?? defaults.contact.socialLinks).map((link) => ({
+        showLabel: true,
+        ...link,
+      })),
+    },
+    ritual: { ...defaults.ritual, ...saved.ritual },
+  };
 }
 
 export async function saveSiteContent(content: SiteContent) {
   await writeJSON("site-content.json", content);
+}
+
+export async function getFieldNoteTags(): Promise<string[]> {
+  const content = await getSiteContent();
+  return content.archive.tags;
 }
 
 // --- Users ---
@@ -247,11 +284,33 @@ export async function deleteLampWord(id: string): Promise<boolean> {
 
 // --- Defaults ---
 
+function slugify(value: string): string {
+  return value
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9\s-]/g, "")
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "")
+    .slice(0, 80);
+}
+
+function uniqueSlug(value: string, entries: FieldNote[]): string {
+  const base = slugify(value) || "field-note";
+  const used = new Set(entries.map((entry) => entry.slug).filter(Boolean));
+  if (!used.has(base)) return base;
+
+  let i = 2;
+  while (used.has(`${base}-${i}`)) i += 1;
+  return `${base}-${i}`;
+}
+
 function getDefaultEntries(): FieldNote[] {
   const now = new Date().toISOString();
   return [
     {
       id: "default-1",
+      slug: "tropical-swallowtail-tattoo-concept-draft",
       title: "Tropical Swallowtail — Tattoo Concept Draft",
       headline: "Wing geometry as body art",
       excerpt:
@@ -269,6 +328,7 @@ function getDefaultEntries(): FieldNote[] {
     },
     {
       id: "default-2",
+      slug: "70k-php-build-rendering-optimization-notes",
       title: "70K PHP Build — Rendering Optimization Notes",
       headline: "Squeezing every frame",
       excerpt:
@@ -286,6 +346,7 @@ function getDefaultEntries(): FieldNote[] {
     },
     {
       id: "default-3",
+      slug: "tiefling-artificer-lore-fragment",
       title: "The Tiefling Artificer — Lore Fragment",
       headline: "A hermit who speaks to machines",
       excerpt:
@@ -303,6 +364,7 @@ function getDefaultEntries(): FieldNote[] {
     },
     {
       id: "default-4",
+      slug: "on-deviation-as-practice",
       title: "On Deviation as Practice",
       headline: "The honest creative strategy",
       excerpt:
@@ -320,6 +382,7 @@ function getDefaultEntries(): FieldNote[] {
     },
     {
       id: "default-5",
+      slug: "moth-wing-studies-ink-on-paper",
       title: "Moth Wing Studies — Ink on Paper",
       headline: "Finding symmetry in asymmetry",
       excerpt:
@@ -337,6 +400,7 @@ function getDefaultEntries(): FieldNote[] {
     },
     {
       id: "default-6",
+      slug: "maiba-red-color-theory-notes",
       title: "Maiba Red — Color Theory Notes",
       headline: "A color that watches you back",
       excerpt:
@@ -400,14 +464,23 @@ function getDefaultSiteContent(): SiteContent {
         "Be moth. Seek light.",
       ],
     },
+    archive: {
+      title: "Field Notes",
+      subtitle:
+        "What doesn't make it into the work... becomes the work.\nThese are the scattered sparks. The light between things.",
+      emptyText: "No field notes yet. The sparks are gathering...",
+      noTagText: "No notes found for this tag.",
+      tags: ["drawing", "log", "code", "create", "vision", "shadow"],
+    },
     contact: {
       title: "Join the Cult",
       subtitle:
         "Want to build something deviant?\nLeave a trace. Light a candle.",
+      socialTitle: "Find us in the periphery",
       socialLinks: [
-        { label: "X (Twitter)", href: "https://twitter.com", icon: "", iconId: "x" },
-        { label: "LinkedIn", href: "https://linkedin.com", icon: "", iconId: "linkedin" },
-        { label: "Email", href: "mailto:hello@maiba.studio", icon: "", iconId: "email" },
+        { label: "X (Twitter)", href: "https://twitter.com", icon: "", iconId: "x", showLabel: true },
+        { label: "LinkedIn", href: "https://linkedin.com", icon: "", iconId: "linkedin", showLabel: true },
+        { label: "Email", href: "mailto:hello@maiba.studio", icon: "", iconId: "email", showLabel: true },
       ],
     },
     ritual: {

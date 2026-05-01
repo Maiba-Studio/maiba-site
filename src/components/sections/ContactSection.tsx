@@ -26,16 +26,18 @@ const fadeUp = {
 interface ContactContent {
   title: string;
   subtitle: string;
-  socialLinks: { label: string; href: string; icon: string; iconId?: string }[];
+  socialTitle: string;
+  socialLinks: { label: string; href: string; icon: string; iconId?: string; showLabel?: boolean }[];
 }
 
 const defaults: ContactContent = {
   title: "Join the Cult",
   subtitle: "Want to build something deviant?\nLeave a trace. Light a candle.",
+  socialTitle: "Find us in the periphery",
   socialLinks: [
-    { label: "X (Twitter)", href: "https://twitter.com", icon: "", iconId: "x" },
-    { label: "LinkedIn", href: "https://linkedin.com", icon: "", iconId: "linkedin" },
-    { label: "Email", href: "mailto:hello@maiba.studio", icon: "", iconId: "email" },
+    { label: "X (Twitter)", href: "https://twitter.com", icon: "", iconId: "x", showLabel: true },
+    { label: "LinkedIn", href: "https://linkedin.com", icon: "", iconId: "linkedin", showLabel: true },
+    { label: "Email", href: "mailto:hello@maiba.studio", icon: "", iconId: "email", showLabel: true },
   ],
 };
 
@@ -246,13 +248,14 @@ export default function ContactSection() {
           className="mt-20 pt-12 border-t border-malamaya-border"
         >
           <p className="text-malamaya text-xs tracking-widest uppercase mb-6 text-center">
-            Find us in the periphery
+            {content.socialTitle}
           </p>
           <div className="flex flex-wrap justify-center gap-4 sm:gap-8">
             {content.socialLinks.map((link, i) => (
               <a
                 key={`${link.label}-${i}`}
                 href={link.href}
+                aria-label={link.label}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center gap-2 text-malamaya text-sm hover:text-maiba-red transition-colors duration-300"
@@ -262,7 +265,7 @@ export default function ContactSection() {
                   customIconUrl={link.icon}
                   size={16}
                 />
-                {link.label}
+                {link.showLabel !== false && link.label}
               </a>
             ))}
           </div>

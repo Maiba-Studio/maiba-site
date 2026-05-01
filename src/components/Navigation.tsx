@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { useRouter, usePathname } from "next/navigation";
 import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import MothModeToggle from "./MothModeToggle";
@@ -13,6 +14,8 @@ const links = [
 ];
 
 export default function Navigation() {
+  const router = useRouter();
+  const pathname = usePathname();
   const [activeSection, setActiveSection] = useState("#home");
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -39,12 +42,18 @@ export default function Navigation() {
   }, []);
 
   const scrollTo = useCallback((href: string) => {
+    if (pathname !== "/") {
+      router.push(`/${href}`);
+      setMobileOpen(false);
+      return;
+    }
+
     const el = document.getElementById(href.slice(1));
     if (el) {
       el.scrollIntoView({ behavior: "smooth" });
     }
     setMobileOpen(false);
-  }, []);
+  }, [pathname, router]);
 
   return (
     <nav

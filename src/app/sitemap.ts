@@ -19,7 +19,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   }));
 
   const fieldNotes: MetadataRoute.Sitemap = entries.map((entry) => ({
-    url: `${baseUrl}/field-notes/${entry.id}`,
+    url: `${baseUrl}/field-notes/${entry.slug || entry.id}`,
     lastModified: new Date(entry.updatedAt || entry.createdAt || entry.date),
   }));
 

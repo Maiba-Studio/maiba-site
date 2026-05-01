@@ -5,23 +5,26 @@ import { X } from "lucide-react";
 import type { FieldNote } from "@/lib/data";
 import RichTextEditor from "./RichTextEditor";
 
-const TAGS = ["drawing", "log", "code", "vision", "shadow"] as const;
-
 interface Props {
   entry: FieldNote | null;
+  availableTags: string[];
   onSaved: () => void;
 }
 
-export default function EntryForm({ entry, onSaved }: Props) {
+export default function EntryForm({ entry, availableTags, onSaved }: Props) {
   const isEdit = !!entry;
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
 
   const [title, setTitle] = useState(entry?.title ?? "");
+  const [slug, setSlug] = useState(entry?.slug ?? "");
   const [headline, setHeadline] = useState(entry?.headline ?? "");
   const [excerpt, setExcerpt] = useState(entry?.excerpt ?? "");
   const [body, setBody] = useState(entry?.body ?? "");
-  const [tag, setTag] = useState<(typeof TAGS)[number]>(entry?.tag ?? "log");
+  const tags = entry?.tag && !availableTags.includes(entry.tag)
+    ? [...availableTags, entry.tag]
+    : availableTags;
+  const [tag, setTag] = useState(entry?.tag ?? tags[0] ?? "log");
   const [date, setDate] = useState(
     entry?.date ?? new Date().toISOString().slice(0, 10)
   );
@@ -59,6 +62,7 @@ export default function EntryForm({ entry, onSaved }: Props) {
 
     const payload = {
       title,
+      slug,
       headline,
       excerpt,
       body,
@@ -113,6 +117,16 @@ export default function EntryForm({ entry, onSaved }: Props) {
           />
         </Field>
 
+        <Field label="SEO URL Slug" hint="Used in /field-notes/your-slug. Leave blank to generate from title.">
+          <input
+            type="text"
+            value={slug}
+            onChange={(e) => setSlug(e.target.value)}
+            className="admin-input"
+            placeholder="my-seo-friendly-field-note"
+          />
+        </Field>
+
         <Field label="Headline" hint="Short subtitle for cards">
           <input
             type="text"
@@ -127,12 +141,10 @@ export default function EntryForm({ entry, onSaved }: Props) {
           <Field label="Tag">
             <select
               value={tag}
-              onChange={(e) =>
-                setTag(e.target.value as (typeof TAGS)[number])
-              }
+              onChange={(e) => setTag(e.target.value)}
               className="admin-input"
             >
-              {TAGS.map((t) => (
+              {tags.map((t) => (
                 <option key={t} value={t}>
                   {t}
                 </option>

@@ -7,7 +7,16 @@ import AdminShell from "@/components/admin/AdminShell";
 import type { SiteContent, SocialLink, LampWord } from "@/lib/data";
 import { SOCIAL_ICON_PRESETS, SocialIconRenderer } from "@/lib/social-icons";
 
-type Tab = "hero" | "about" | "contact" | "ritual" | "lamp";
+type Tab = "hero" | "about" | "archive" | "contact" | "ritual" | "lamp";
+
+const defaultArchive: SiteContent["archive"] = {
+  title: "Field Notes",
+  subtitle:
+    "What doesn't make it into the work... becomes the work.\nThese are the scattered sparks. The light between things.",
+  emptyText: "No field notes yet. The sparks are gathering...",
+  noTagText: "No notes found for this tag.",
+  tags: ["drawing", "log", "code", "create", "vision", "shadow"],
+};
 
 const defaultRitual: SiteContent["ritual"] = {
   title: ":: Maiba Manifesto ::",
@@ -62,11 +71,14 @@ export default function SiteContentPage() {
           },
           contact: {
             ...data.contact!,
+            socialTitle: data.contact?.socialTitle ?? "Find us in the periphery",
             socialLinks: (data.contact?.socialLinks ?? []).map((l) => ({
               ...l,
               icon: (l as SocialLink).icon ?? "",
+              showLabel: (l as SocialLink).showLabel !== false,
             })),
           },
+          archive: data.archive ?? defaultArchive,
           ritual: data.ritual ?? defaultRitual,
         } as SiteContent);
       });
@@ -154,6 +166,7 @@ export default function SiteContentPage() {
   const tabs: { id: Tab; label: string }[] = [
     { id: "hero", label: "Hero" },
     { id: "about", label: "About" },
+    { id: "archive", label: "Field Notes" },
     { id: "contact", label: "Contact" },
     { id: "ritual", label: "Ritual" },
     { id: "lamp", label: "Lamp" },
@@ -161,6 +174,9 @@ export default function SiteContentPage() {
 
   const updateAbout = (patch: Partial<SiteContent["about"]>) =>
     setContent({ ...content, about: { ...content.about, ...patch } });
+
+  const updateArchive = (patch: Partial<SiteContent["archive"]>) =>
+    setContent({ ...content, archive: { ...content.archive, ...patch } });
 
   const updateSocialLink = (index: number, patch: Partial<SocialLink>) => {
     const links = [...content.contact.socialLinks];
@@ -178,7 +194,7 @@ export default function SiteContentPage() {
         ...content.contact,
         socialLinks: [
           ...content.contact.socialLinks,
-          { label: "", href: "", icon: "", iconId: "x" },
+          { label: "", href: "", icon: "", iconId: "x", showLabel: true },
         ],
       },
     });
@@ -257,13 +273,18 @@ export default function SiteContentPage() {
             <Field label="Origin Lines" hint="One line per paragraph">
               <textarea value={content.about.originLines.join("\n")} onChange={(e) => updateAbout({ originLines: e.target.value.split("\n") })} rows={4} className="admin-input resize-y" />
             </Field>
+            <Field label="Eye Section Title">
+              <input type="text" value={content.about.eyeTitle} onChange={(e) => updateAbout({ eyeTitle: e.target.value })} className="admin-input" />
+            </Field>
             <Field label="Eye Section Paragraphs" hint="One per line">
               <textarea value={content.about.eyeParagraphs.join("\n")} onChange={(e) => updateAbout({ eyeParagraphs: e.target.value.split("\n") })} rows={6} className="admin-input resize-y" />
             </Field>
 
             {/* Founder */}
             <div className="border border-malamaya-border/20 rounded-sm p-5 space-y-4">
-              <p className="text-xs tracking-widest uppercase text-malamaya-light">Founder</p>
+              <Field label="Founder Section Title">
+                <input type="text" value={content.about.founderTitle} onChange={(e) => updateAbout({ founderTitle: e.target.value })} className="admin-input" />
+              </Field>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <Field label="Name">
                   <input type="text" value={content.about.founderName} onChange={(e) => updateAbout({ founderName: e.target.value })} className="admin-input" />
@@ -308,8 +329,29 @@ export default function SiteContentPage() {
             <Field label="Founder Bio Paragraphs" hint="One per line">
               <textarea value={content.about.founderParagraphs.join("\n")} onChange={(e) => updateAbout({ founderParagraphs: e.target.value.split("\n") })} rows={4} className="admin-input resize-y" />
             </Field>
+            <Field label="Ethos Section Title">
+              <input type="text" value={content.about.ethosTitle} onChange={(e) => updateAbout({ ethosTitle: e.target.value })} className="admin-input" />
+            </Field>
             <Field label="Ethos List" hint="One per line">
               <textarea value={content.about.ethosList.join("\n")} onChange={(e) => updateAbout({ ethosList: e.target.value.split("\n") })} rows={5} className="admin-input resize-y" />
+            </Field>
+          </>
+        )}
+
+        {/* ── Field Notes ── */}
+        {activeTab === "archive" && (
+          <>
+            <Field label="Section Title">
+              <input type="text" value={content.archive.title} onChange={(e) => updateArchive({ title: e.target.value })} className="admin-input" />
+            </Field>
+            <Field label="Section Subtitle" hint="Line breaks are preserved">
+              <textarea value={content.archive.subtitle} onChange={(e) => updateArchive({ subtitle: e.target.value })} rows={4} className="admin-input resize-y" />
+            </Field>
+            <Field label="Empty State Text">
+              <input type="text" value={content.archive.emptyText} onChange={(e) => updateArchive({ emptyText: e.target.value })} className="admin-input" />
+            </Field>
+            <Field label="No Matching Tag Text">
+              <input type="text" value={content.archive.noTagText} onChange={(e) => updateArchive({ noTagText: e.target.value })} className="admin-input" />
             </Field>
           </>
         )}
@@ -322,6 +364,9 @@ export default function SiteContentPage() {
             </Field>
             <Field label="Subtitle">
               <textarea value={content.contact.subtitle} onChange={(e) => setContent({ ...content, contact: { ...content.contact, subtitle: e.target.value } })} rows={3} className="admin-input resize-none" />
+            </Field>
+            <Field label="Social Links Section Title">
+              <input type="text" value={content.contact.socialTitle} onChange={(e) => setContent({ ...content, contact: { ...content.contact, socialTitle: e.target.value } })} className="admin-input" />
             </Field>
 
             <div>
@@ -408,6 +453,16 @@ export default function SiteContentPage() {
                           </select>
                         </div>
                       </Field>
+
+                      <label className="flex items-center gap-3 text-sm text-malamaya-light">
+                        <input
+                          type="checkbox"
+                          checked={link.showLabel !== false}
+                          onChange={(e) => updateSocialLink(i, { showLabel: e.target.checked })}
+                          className="accent-maiba-red"
+                        />
+                        Show label next to icon on the public site
+                      </label>
 
                       {(link.iconId === "custom" || (!link.iconId && link.icon)) && (
                         <Field label="Custom Icon URL" hint="direct link to an image">

@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import AdminShell from "@/components/admin/AdminShell";
 import EntryForm from "@/components/admin/EntryForm";
-import type { FieldNote } from "@/lib/data";
+import type { FieldNote, SiteContent } from "@/lib/data";
 
 export const dynamic = "force-dynamic";
 
@@ -11,6 +11,7 @@ const tagColors: Record<string, string> = {
   drawing: "text-amber-400 border-amber-400/30",
   log: "text-emerald-400 border-emerald-400/30",
   code: "text-sky-400 border-sky-400/30",
+  create: "text-pink-400 border-pink-400/30",
   vision: "text-maiba-red border-maiba-red/30",
   shadow: "text-purple-400 border-purple-400/30",
 };
@@ -20,6 +21,9 @@ export default function EntriesPage() {
   const [editing, setEditing] = useState<FieldNote | null>(null);
   const [creating, setCreating] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [siteContent, setSiteContent] = useState<SiteContent | null>(null);
+  const [newTag, setNewTag] = useState("");
+  const [tagMessage, setTagMessage] = useState("");
 
   const fetchEntries = useCallback(async () => {
     const res = await fetch(`/api/entries?all=true&_t=${Date.now()}`, {
@@ -42,7 +46,59 @@ export default function EntriesPage() {
         setLoading(false);
       })
       .catch(() => setLoading(false));
+
+    fetch("/api/site-content")
+      .then((r) => r.json())
+      .then((data: SiteContent) => setSiteContent(data))
+      .catch(() => {});
   }, [fetchEntries]);
+
+  const configuredTags = siteContent?.archive.tags ?? ["drawing", "log", "code", "create", "vision", "shadow"];
+  const usedTags = Array.from(new Set(entries.map((entry) => entry.tag))).sort();
+
+  const saveTags = async (tags: string[]) => {
+    if (!siteContent) return;
+    const nextContent = {
+      ...siteContent,
+      archive: { ...siteContent.archive, tags },
+    };
+    setSiteContent(nextContent);
+    const res = await fetch("/api/site-content", {
+      method: "PUT",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(nextContent),
+    });
+    if (!res.ok) {
+      setTagMessage("Failed to save tags.");
+      return;
+    }
+    setTagMessage("Tags saved.");
+    setTimeout(() => setTagMessage(""), 2500);
+  };
+
+  const normalizeTag = (value: string) =>
+    value
+      .trim()
+      .toLowerCase()
+      .replace(/[^a-z0-9-_\s]/g, "")
+      .replace(/\s+/g, "-")
+      .slice(0, 40);
+
+  const addTag = async () => {
+    const tag = normalizeTag(newTag);
+    if (!tag || configuredTags.includes(tag)) return;
+    setNewTag("");
+    await saveTags([...configuredTags, tag]);
+  };
+
+  const removeTag = async (tag: string) => {
+    if (usedTags.includes(tag)) {
+      setTagMessage(`"${tag}" is used by existing entries. Reassign those entries before removing it.`);
+      return;
+    }
+    await saveTags(configuredTags.filter((t) => t !== tag));
+  };
 
   const handleDelete = async (id: string) => {
     if (!confirm("Delete this entry permanently?")) return;
@@ -103,7 +159,7 @@ export default function EntriesPage() {
             ← Back to entries
           </button>
         </div>
-        <EntryForm entry={editing} onSaved={handleSaved} />
+        <EntryForm entry={editing} availableTags={configuredTags} onSaved={handleSaved} />
       </AdminShell>
     );
   }
@@ -125,6 +181,60 @@ export default function EntriesPage() {
         >
           + New Entry
         </button>
+      </div>
+
+      <div className="border border-malamaya-border/20 rounded-sm p-4 sm:p-5 mb-8">
+        <div className="flex flex-col sm:flex-row sm:items-end gap-3 sm:justify-between mb-4">
+          <div>
+            <h2 className="text-sm tracking-widest uppercase text-malamaya-light">
+              Field Note Tags
+            </h2>
+            <p className="text-malamaya text-xs mt-1">
+              These power the public archive filters and the tag picker when editing notes.
+            </p>
+          </div>
+          <div className="flex gap-2">
+            <input
+              type="text"
+              value={newTag}
+              onChange={(e) => setNewTag(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  addTag();
+                }
+              }}
+              className="admin-input h-9 min-w-[160px]"
+              placeholder="new-tag"
+            />
+            <button
+              type="button"
+              onClick={addTag}
+              className="bg-maiba-red/10 border border-maiba-red/30 text-maiba-red px-4 rounded-sm hover:bg-maiba-red/20 transition-colors text-xs tracking-widest uppercase"
+            >
+              Add
+            </button>
+          </div>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          {configuredTags.map((tag) => (
+            <span
+              key={tag}
+              className="inline-flex items-center gap-2 text-xs text-maiba-red/90 border border-maiba-red/25 px-2.5 py-1 rounded-sm"
+            >
+              {tag}
+              <button
+                type="button"
+                onClick={() => removeTag(tag)}
+                className="text-maiba-red/60 hover:text-maiba-red"
+                aria-label={`Remove ${tag} tag`}
+              >
+                ×
+              </button>
+            </span>
+          ))}
+        </div>
+        {tagMessage && <p className="text-malamaya text-xs mt-3">{tagMessage}</p>}
       </div>
 
       {loading ? (
