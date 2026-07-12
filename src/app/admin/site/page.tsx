@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useEffect, useState, FormEvent } from "react";
 import { ChevronUp, ChevronDown, GripVertical } from "lucide-react";
 import AdminShell from "@/components/admin/AdminShell";
+import RichTextEditor from "@/components/admin/RichTextEditor";
 import type { SiteContent, SocialLink, LampWord } from "@/lib/data";
 import { SOCIAL_ICON_PRESETS, SocialIconRenderer } from "@/lib/social-icons";
 
@@ -12,7 +13,7 @@ type Tab = "hero" | "about" | "archive" | "contact" | "ritual" | "lamp";
 const defaultArchive: SiteContent["archive"] = {
   title: "Field Notes",
   subtitle:
-    "What doesn't make it into the work... becomes the work.\nThese are the scattered sparks. The light between things.",
+    "<p>What doesn't make it into the work... becomes the work.</p><p>These are the scattered sparks. The light between things.</p>",
   emptyText: "No field notes yet. The sparks are gathering...",
   noTagText: "No notes found for this tag.",
   tags: ["drawing", "log", "code", "create", "vision", "shadow"],
@@ -229,12 +230,13 @@ export default function SiteContentPage() {
         </p>
       </div>
 
-      <div className="flex gap-1 mb-8 border-b border-malamaya-border/20 overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0 scrollbar-none">
+      <div className="admin-tabs">
         {tabs.map((tab) => (
           <button
             key={tab.id}
+            type="button"
             onClick={() => setActiveTab(tab.id)}
-            className={`px-3 sm:px-5 py-3 text-xs sm:text-sm tracking-widest uppercase transition-colors border-b-2 -mb-px whitespace-nowrap ${
+            className={`px-3 sm:px-4 py-2.5 text-[11px] sm:text-sm tracking-widest uppercase transition-colors border-b-2 -mb-px whitespace-nowrap ${
               activeTab === tab.id
                 ? "border-maiba-red text-maiba-red"
                 : "border-transparent text-malamaya hover:text-foreground"
@@ -245,7 +247,7 @@ export default function SiteContentPage() {
         ))}
       </div>
 
-      <form onSubmit={handleSave} className="max-w-2xl space-y-6">
+      <form onSubmit={handleSave} className="max-w-2xl space-y-6 min-w-0 w-full">
         {/* ── Hero ── */}
         {activeTab === "hero" && (
           <>
@@ -253,10 +255,10 @@ export default function SiteContentPage() {
               <input type="text" value={content.hero.title} onChange={(e) => setContent({ ...content, hero: { ...content.hero, title: e.target.value } })} className="admin-input" />
             </Field>
             <Field label="Tagline">
-              <input type="text" value={content.hero.tagline} onChange={(e) => setContent({ ...content, hero: { ...content.hero, tagline: e.target.value } })} className="admin-input" />
+              <textarea value={content.hero.tagline} onChange={(e) => setContent({ ...content, hero: { ...content.hero, tagline: e.target.value } })} rows={2} className="admin-input" />
             </Field>
             <Field label="Hover Text">
-              <input type="text" value={content.hero.hoverText} onChange={(e) => setContent({ ...content, hero: { ...content.hero, hoverText: e.target.value } })} className="admin-input" />
+              <textarea value={content.hero.hoverText} onChange={(e) => setContent({ ...content, hero: { ...content.hero, hoverText: e.target.value } })} rows={4} className="admin-input" />
             </Field>
             <Field label="Scroll Cue Text">
               <input type="text" value={content.hero.scrollCue} onChange={(e) => setContent({ ...content, hero: { ...content.hero, scrollCue: e.target.value } })} className="admin-input" />
@@ -270,18 +272,26 @@ export default function SiteContentPage() {
             <Field label="Origin Section Title">
               <input type="text" value={content.about.originTitle} onChange={(e) => updateAbout({ originTitle: e.target.value })} className="admin-input" />
             </Field>
-            <Field label="Origin Lines" hint="One line per paragraph">
-              <textarea value={content.about.originLines.join("\n")} onChange={(e) => updateAbout({ originLines: e.target.value.split("\n") })} rows={4} className="admin-input resize-y" />
+            <Field label="Origin Body">
+              <RichTextEditor
+                content={content.about.originLines}
+                onChange={(html) => updateAbout({ originLines: html })}
+                placeholder="Origin story..."
+              />
             </Field>
             <Field label="Eye Section Title">
               <input type="text" value={content.about.eyeTitle} onChange={(e) => updateAbout({ eyeTitle: e.target.value })} className="admin-input" />
             </Field>
-            <Field label="Eye Section Paragraphs" hint="One per line">
-              <textarea value={content.about.eyeParagraphs.join("\n")} onChange={(e) => updateAbout({ eyeParagraphs: e.target.value.split("\n") })} rows={6} className="admin-input resize-y" />
+            <Field label="Eye Section Body">
+              <RichTextEditor
+                content={content.about.eyeParagraphs}
+                onChange={(html) => updateAbout({ eyeParagraphs: html })}
+                placeholder="The Eye story..."
+              />
             </Field>
 
             {/* Founder */}
-            <div className="border border-malamaya-border/20 rounded-sm p-5 space-y-4">
+            <div className="border border-malamaya-border/20 rounded-sm p-4 sm:p-5 space-y-4">
               <Field label="Founder Section Title">
                 <input type="text" value={content.about.founderTitle} onChange={(e) => updateAbout({ founderTitle: e.target.value })} className="admin-input" />
               </Field>
@@ -305,7 +315,7 @@ export default function SiteContentPage() {
             </div>
 
             {/* Alter Ego */}
-            <div className="border border-malamaya-border/20 rounded-sm p-5 space-y-4">
+            <div className="border border-malamaya-border/20 rounded-sm p-4 sm:p-5 space-y-4">
               <p className="text-xs tracking-widest uppercase text-malamaya-light">Alter Ego</p>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <Field label="Name">
@@ -326,14 +336,18 @@ export default function SiteContentPage() {
               )}
             </div>
 
-            <Field label="Founder Bio Paragraphs" hint="One per line">
-              <textarea value={content.about.founderParagraphs.join("\n")} onChange={(e) => updateAbout({ founderParagraphs: e.target.value.split("\n") })} rows={4} className="admin-input resize-y" />
+            <Field label="Founder Bio">
+              <RichTextEditor
+                content={content.about.founderParagraphs}
+                onChange={(html) => updateAbout({ founderParagraphs: html })}
+                placeholder="Founder bio..."
+              />
             </Field>
             <Field label="Ethos Section Title">
               <input type="text" value={content.about.ethosTitle} onChange={(e) => updateAbout({ ethosTitle: e.target.value })} className="admin-input" />
             </Field>
-            <Field label="Ethos List" hint="One per line">
-              <textarea value={content.about.ethosList.join("\n")} onChange={(e) => updateAbout({ ethosList: e.target.value.split("\n") })} rows={5} className="admin-input resize-y" />
+            <Field label="Ethos List" hint="One item per line">
+              <textarea value={content.about.ethosList.join("\n")} onChange={(e) => updateAbout({ ethosList: e.target.value.split("\n") })} rows={5} className="admin-input" />
             </Field>
           </>
         )}
@@ -344,14 +358,18 @@ export default function SiteContentPage() {
             <Field label="Section Title">
               <input type="text" value={content.archive.title} onChange={(e) => updateArchive({ title: e.target.value })} className="admin-input" />
             </Field>
-            <Field label="Section Subtitle" hint="Line breaks are preserved">
-              <textarea value={content.archive.subtitle} onChange={(e) => updateArchive({ subtitle: e.target.value })} rows={4} className="admin-input resize-y" />
+            <Field label="Section Subtitle">
+              <RichTextEditor
+                content={content.archive.subtitle}
+                onChange={(html) => updateArchive({ subtitle: html })}
+                placeholder="Field notes intro..."
+              />
             </Field>
             <Field label="Empty State Text">
-              <input type="text" value={content.archive.emptyText} onChange={(e) => updateArchive({ emptyText: e.target.value })} className="admin-input" />
+              <textarea value={content.archive.emptyText} onChange={(e) => updateArchive({ emptyText: e.target.value })} rows={2} className="admin-input" />
             </Field>
             <Field label="No Matching Tag Text">
-              <input type="text" value={content.archive.noTagText} onChange={(e) => updateArchive({ noTagText: e.target.value })} className="admin-input" />
+              <textarea value={content.archive.noTagText} onChange={(e) => updateArchive({ noTagText: e.target.value })} rows={2} className="admin-input" />
             </Field>
           </>
         )}
@@ -363,7 +381,11 @@ export default function SiteContentPage() {
               <input type="text" value={content.contact.title} onChange={(e) => setContent({ ...content, contact: { ...content.contact, title: e.target.value } })} className="admin-input" />
             </Field>
             <Field label="Subtitle">
-              <textarea value={content.contact.subtitle} onChange={(e) => setContent({ ...content, contact: { ...content.contact, subtitle: e.target.value } })} rows={3} className="admin-input resize-none" />
+              <RichTextEditor
+                content={content.contact.subtitle}
+                onChange={(html) => setContent({ ...content, contact: { ...content.contact, subtitle: html } })}
+                placeholder="Contact intro..."
+              />
             </Field>
             <Field label="Social Links Section Title">
               <input type="text" value={content.contact.socialTitle} onChange={(e) => setContent({ ...content, contact: { ...content.contact, socialTitle: e.target.value } })} className="admin-input" />
@@ -524,7 +546,7 @@ export default function SiteContentPage() {
               />
             </Field>
             <Field label="Closing Attribution">
-              <input type="text" value={content.ritual.closingAttribution} onChange={(e) => setContent({ ...content, ritual: { ...content.ritual, closingAttribution: e.target.value } })} className="admin-input font-mono text-sm" />
+              <textarea value={content.ritual.closingAttribution} onChange={(e) => setContent({ ...content, ritual: { ...content.ritual, closingAttribution: e.target.value } })} rows={2} className="admin-input font-mono text-sm" />
             </Field>
           </>
         )}
@@ -660,15 +682,15 @@ function Field({
   children: React.ReactNode;
 }) {
   return (
-    <div>
+    <div className="min-w-0">
       <label className="text-xs tracking-widest uppercase text-malamaya mb-2 block">
         {label}
-        {hint && (
-          <span className="text-malamaya-border ml-2 normal-case tracking-normal">
-            — {hint}
-          </span>
-        )}
       </label>
+      {hint && (
+        <p className="text-malamaya-border text-xs mb-2 normal-case tracking-normal">
+          {hint}
+        </p>
+      )}
       {children}
     </div>
   );

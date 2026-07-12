@@ -13,11 +13,11 @@ const fadeUp = {
 
 interface AboutContent {
   originTitle: string;
-  originLines: string[];
+  originLines: string;
   eyeTitle: string;
-  eyeParagraphs: string[];
+  eyeParagraphs: string;
   founderTitle: string;
-  founderParagraphs: string[];
+  founderParagraphs: string;
   founderName: string;
   founderRole: string;
   founderImage: string;
@@ -30,22 +30,13 @@ interface AboutContent {
 
 const defaults: AboutContent = {
   originTitle: 'The Origin of "Maiba"',
-  originLines: [
-    "Maiba means to change, to differ, to deviate.",
-    "It is a word with motion, like flame.",
-    "We don't create to fit in—we create to remember who we are becoming.",
-  ],
+  originLines:
+    "<p>Maiba means to change, to differ, to deviate.</p><p>It is a word with motion, like flame.</p><p>We don't create to fit in—we create to remember who we are becoming.</p>",
   eyeTitle: "The Eye",
-  eyeParagraphs: [
-    "In 2024, I lost sight in my left eye due to a severe infection—blinding me for a week.",
-    "Then my right eye began to drift inward. Doctors feared a tumor.",
-    "I lived in a world too bright to bear. I couldn't see without pain.",
-    "It was the wake-up call I didn't know I needed.",
-    "So I stopped. I left my roles, paused the projects, and finally chose to build something for me.",
-    "Maiba is that choice. No more delays. No more excuses. Just truth, in the time I have left to see it.",
-  ],
+  eyeParagraphs:
+    "<p>In 2024, I lost sight in my left eye due to a severe infection—blinding me for a week.</p><p>Then my right eye began to drift inward. Doctors feared a tumor.</p><p>I lived in a world too bright to bear. I couldn't see without pain.</p><p>It was the wake-up call I didn't know I needed.</p><p>So I stopped. I left my roles, paused the projects, and finally chose to build something for me.</p><p>Maiba is that choice. No more delays. No more excuses. Just truth, in the time I have left to see it.</p>",
   founderTitle: "The Founder",
-  founderParagraphs: [],
+  founderParagraphs: "",
   founderName: "EL Bonuan",
   founderRole: "Founder · Imagineer",
   founderImage: "",
@@ -70,7 +61,23 @@ export default function AboutSection() {
     fetch("/api/site-content")
       .then((r) => r.json())
       .then((data) => {
-        if (data.about) setContent({ ...defaults, ...data.about });
+        if (!data.about) return;
+        setContent({
+          ...defaults,
+          ...data.about,
+          originLines:
+            typeof data.about.originLines === "string"
+              ? data.about.originLines
+              : defaults.originLines,
+          eyeParagraphs:
+            typeof data.about.eyeParagraphs === "string"
+              ? data.about.eyeParagraphs
+              : defaults.eyeParagraphs,
+          founderParagraphs:
+            typeof data.about.founderParagraphs === "string"
+              ? data.about.founderParagraphs
+              : defaults.founderParagraphs,
+        });
       })
       .catch(() => {});
   }, []);
@@ -85,11 +92,10 @@ export default function AboutSection() {
           <p className="text-maiba-red text-xs tracking-[0.3em] uppercase mb-8">
             {content.originTitle}
           </p>
-          <div className="space-y-6 font-accent italic text-bone/80 text-lg md:text-xl leading-relaxed">
-            {content.originLines.map((line, i) => (
-              <p key={i}>{line}</p>
-            ))}
-          </div>
+          <div
+            className="site-rich-text site-rich-text--accent font-accent italic text-bone/80 text-lg md:text-xl leading-relaxed"
+            dangerouslySetInnerHTML={{ __html: content.originLines }}
+          />
         </motion.div>
       </div>
 
@@ -99,26 +105,10 @@ export default function AboutSection() {
           <p className="text-maiba-red text-xs tracking-[0.3em] uppercase mb-8">
             {content.eyeTitle}
           </p>
-          <div className="space-y-6 text-malamaya-light text-base md:text-lg leading-relaxed border-l-2 border-malamaya-border pl-6">
-            {content.eyeParagraphs.map((para, i) => {
-              const isWakeUp = para.includes("wake-up call");
-              const isChoice = para.includes("Maiba is that choice");
-              return (
-                <p
-                  key={i}
-                  className={
-                    isChoice
-                      ? "text-maiba-red font-accent italic"
-                      : isWakeUp
-                        ? "text-foreground"
-                        : ""
-                  }
-                >
-                  {para}
-                </p>
-              );
-            })}
-          </div>
+          <div
+            className="site-rich-text text-malamaya-light text-base md:text-lg leading-relaxed border-l-2 border-malamaya-border pl-6"
+            dangerouslySetInnerHTML={{ __html: content.eyeParagraphs }}
+          />
         </motion.div>
       </div>
 
@@ -192,27 +182,28 @@ export default function AboutSection() {
           </motion.button>
 
           {/* Bio text */}
-          <div className="space-y-6 text-malamaya-light text-base md:text-lg leading-relaxed">
-            {content.founderParagraphs.length > 0 ? (
-              content.founderParagraphs.map((para, i) => (
-                <p key={i}>{para}</p>
-              ))
-            ) : (
-              <>
-                <p>
-                  <strong className="text-foreground">{content.founderName}</strong>{" "}
-                  is the founder and imagineer of Maiba Studio. A cultural deviant
-                  working across art, AI, Web3, and interior space, he builds at
-                  the bleeding edge of creative technology.
-                </p>
-                <p>
-                  His alter ego,{" "}
-                  <strong className="text-foreground">{content.alterEgoName}</strong>,
-                  is the seeker—a moth cultist following light through shadow.
-                </p>
-              </>
-            )}
-          </div>
+          {content.founderParagraphs.trim() ? (
+            <div
+              className="site-rich-text text-malamaya-light text-base md:text-lg leading-relaxed"
+              dangerouslySetInnerHTML={{
+                __html: content.founderParagraphs,
+              }}
+            />
+          ) : (
+            <div className="space-y-6 text-malamaya-light text-base md:text-lg leading-relaxed">
+              <p>
+                <strong className="text-foreground">{content.founderName}</strong>{" "}
+                is the founder and imagineer of Maiba Studio. A cultural deviant
+                working across art, AI, Web3, and interior space, he builds at
+                the bleeding edge of creative technology.
+              </p>
+              <p>
+                His alter ego,{" "}
+                <strong className="text-foreground">{content.alterEgoName}</strong>,
+                is the seeker—a moth cultist following light through shadow.
+              </p>
+            </div>
+          )}
         </motion.div>
       </div>
 

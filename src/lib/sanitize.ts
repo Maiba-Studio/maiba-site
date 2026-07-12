@@ -56,6 +56,40 @@ function escapeHtml(text: string): string {
     .replace(/"/g, "&quot;");
 }
 
+/** Convert legacy line arrays (or plain text) into paragraph HTML. */
+export function linesToHtml(value: unknown): string {
+  if (typeof value === "string") {
+    const trimmed = value.trim();
+    if (!trimmed) return "";
+    if (/<[a-z][\s\S]*>/i.test(trimmed)) return sanitizeRichText(trimmed);
+    return sanitizeRichText(
+      trimmed
+        .split(/\n{2,}|\n/)
+        .map((line) => line.trim())
+        .filter(Boolean)
+        .map((line) => `<p>${escapeHtml(line)}</p>`)
+        .join("")
+    );
+  }
+
+  if (Array.isArray(value)) {
+    return sanitizeRichText(
+      value
+        .map((line) => String(line ?? "").trim())
+        .filter(Boolean)
+        .map((line) => `<p>${escapeHtml(line)}</p>`)
+        .join("")
+    );
+  }
+
+  return "";
+}
+
+/** Normalize site-content rich fields that may still be string[]. */
+export function richTextField(value: unknown): string {
+  return linesToHtml(value);
+}
+
 function decodeBasicEntities(text: string): string {
   return text
     .replace(/&nbsp;/gi, " ")

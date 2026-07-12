@@ -1,4 +1,5 @@
 import { v4 as uuid } from "uuid";
+import { richTextField } from "./sanitize";
 import { readJSON, writeJSON } from "./storage";
 
 export interface FieldNote {
@@ -36,11 +37,12 @@ export interface SiteContent {
   };
   about: {
     originTitle: string;
-    originLines: string[];
+    /** HTML rich text (legacy string[] migrated on read). */
+    originLines: string;
     eyeTitle: string;
-    eyeParagraphs: string[];
+    eyeParagraphs: string;
     founderTitle: string;
-    founderParagraphs: string[];
+    founderParagraphs: string;
     founderName: string;
     founderRole: string;
     founderImage: string;
@@ -52,6 +54,7 @@ export interface SiteContent {
   };
   archive: {
     title: string;
+    /** HTML rich text (legacy plain/newline text migrated on read). */
     subtitle: string;
     emptyText: string;
     noTagText: string;
@@ -59,6 +62,7 @@ export interface SiteContent {
   };
   contact: {
     title: string;
+    /** HTML rich text (legacy plain/newline text migrated on read). */
     subtitle: string;
     socialTitle: string;
     socialLinks: SocialLink[];
@@ -158,19 +162,34 @@ export async function deleteEntry(id: string): Promise<boolean> {
 export async function getSiteContent(): Promise<SiteContent> {
   const defaults = getDefaultSiteContent();
   const saved = await readJSON<Partial<SiteContent>>("site-content.json", defaults);
+  const about = { ...defaults.about, ...saved.about };
+  const archive = { ...defaults.archive, ...saved.archive };
+  const contact = {
+    ...defaults.contact,
+    ...saved.contact,
+    socialLinks: (saved.contact?.socialLinks ?? defaults.contact.socialLinks).map((link) => ({
+      showLabel: true,
+      ...link,
+    })),
+  };
+
   return {
     ...defaults,
     ...saved,
     hero: { ...defaults.hero, ...saved.hero },
-    about: { ...defaults.about, ...saved.about },
-    archive: { ...defaults.archive, ...saved.archive },
+    about: {
+      ...about,
+      originLines: richTextField(about.originLines),
+      eyeParagraphs: richTextField(about.eyeParagraphs),
+      founderParagraphs: richTextField(about.founderParagraphs),
+    },
+    archive: {
+      ...archive,
+      subtitle: richTextField(archive.subtitle),
+    },
     contact: {
-      ...defaults.contact,
-      ...saved.contact,
-      socialLinks: (saved.contact?.socialLinks ?? defaults.contact.socialLinks).map((link) => ({
-        showLabel: true,
-        ...link,
-      })),
+      ...contact,
+      subtitle: richTextField(contact.subtitle),
     },
     ritual: { ...defaults.ritual, ...saved.ritual },
   };
@@ -430,25 +449,25 @@ function getDefaultSiteContent(): SiteContent {
     },
     about: {
       originTitle: 'The Origin of "Maiba"',
-      originLines: [
+      originLines: richTextField([
         "Maiba means to change, to differ, to deviate.",
         "It is a word with motion, like flame.",
         "We don't create to fit in—we create to remember who we are becoming.",
-      ],
+      ]),
       eyeTitle: "The Eye",
-      eyeParagraphs: [
+      eyeParagraphs: richTextField([
         "In 2024, I lost sight in my left eye due to a severe infection—blinding me for a week.",
         "Then my right eye began to drift inward. Doctors feared a tumor.",
         "I lived in a world too bright to bear. I couldn't see without pain.",
         "It was the wake-up call I didn't know I needed.",
         "So I stopped. I left my roles, paused the projects, and finally chose to build something for me.",
         "Maiba is that choice. No more delays. No more excuses. Just truth, in the time I have left to see it.",
-      ],
+      ]),
       founderTitle: "The Founder",
-      founderParagraphs: [
+      founderParagraphs: richTextField([
         "EL Bonuan is the founder and imagineer of Maiba Studio. A cultural deviant working across art, AI, Web3, and interior space, he builds at the bleeding edge of creative technology.",
         "His alter ego, Gamotwox, is the seeker—a moth cultist following light through shadow.",
-      ],
+      ]),
       founderName: "EL Bonuan",
       founderRole: "Founder · Imagineer",
       founderImage: "/images/founder-placeholder.png",
@@ -466,16 +485,18 @@ function getDefaultSiteContent(): SiteContent {
     },
     archive: {
       title: "Field Notes",
-      subtitle:
-        "What doesn't make it into the work... becomes the work.\nThese are the scattered sparks. The light between things.",
+      subtitle: richTextField(
+        "What doesn't make it into the work... becomes the work.\nThese are the scattered sparks. The light between things."
+      ),
       emptyText: "No field notes yet. The sparks are gathering...",
       noTagText: "No notes found for this tag.",
       tags: ["drawing", "log", "code", "create", "vision", "shadow"],
     },
     contact: {
       title: "Join the Cult",
-      subtitle:
-        "Want to build something deviant?\nLeave a trace. Light a candle.",
+      subtitle: richTextField(
+        "Want to build something deviant?\nLeave a trace. Light a candle."
+      ),
       socialTitle: "Find us in the periphery",
       socialLinks: [
         { label: "X (Twitter)", href: "https://twitter.com", icon: "", iconId: "x", showLabel: true },

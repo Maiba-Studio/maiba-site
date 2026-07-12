@@ -1,5 +1,5 @@
 import type { FieldNote, LampWord, SiteContent, UserRole } from "@/lib/data";
-import { prepareFieldNoteBody } from "@/lib/sanitize";
+import { prepareFieldNoteBody, richTextField } from "@/lib/sanitize";
 
 const USER_ROLES = ["admin", "moderator"] as const;
 
@@ -177,11 +177,11 @@ export function parseSiteContent(value: unknown): SiteContent | null {
     },
     about: {
       originTitle: stringValue(content.about.originTitle),
-      originLines: stringArray(content.about.originLines),
+      originLines: richTextField(content.about.originLines),
       eyeTitle: stringValue(content.about.eyeTitle),
-      eyeParagraphs: stringArray(content.about.eyeParagraphs),
+      eyeParagraphs: richTextField(content.about.eyeParagraphs),
       founderTitle: stringValue(content.about.founderTitle),
-      founderParagraphs: stringArray(content.about.founderParagraphs),
+      founderParagraphs: richTextField(content.about.founderParagraphs),
       founderName: stringValue(content.about.founderName),
       founderRole: stringValue(content.about.founderRole),
       founderImage: normalizeUrl(content.about.founderImage),
@@ -193,14 +193,14 @@ export function parseSiteContent(value: unknown): SiteContent | null {
     },
     archive: {
       title: stringValue(content.archive?.title),
-      subtitle: stringValue(content.archive?.subtitle),
+      subtitle: richTextField(content.archive?.subtitle),
       emptyText: stringValue(content.archive?.emptyText),
       noTagText: stringValue(content.archive?.noTagText),
       tags: stringArray(content.archive?.tags).map(normalizeTag).filter(Boolean),
     },
     contact: {
       title: stringValue(content.contact.title),
-      subtitle: stringValue(content.contact.subtitle),
+      subtitle: richTextField(content.contact.subtitle),
       socialTitle: stringValue(content.contact.socialTitle),
       socialLinks: Array.isArray(content.contact.socialLinks)
         ? content.contact.socialLinks

@@ -38,7 +38,7 @@ const POLL_INTERVAL = 15000;
 const defaultArchive: ArchiveContent = {
   title: "Field Notes",
   subtitle:
-    "What doesn't make it into the work... becomes the work.\nThese are the scattered sparks. The light between things.",
+    "<p>What doesn't make it into the work... becomes the work.</p><p>These are the scattered sparks. The light between things.</p>",
   emptyText: "No field notes yet. The sparks are gathering...",
   noTagText: "No notes found for this tag.",
   tags: ["drawing", "log", "code", "create", "vision", "shadow"],
@@ -148,9 +148,10 @@ export default function ArchiveSection() {
           <h2 className="font-display text-4xl md:text-5xl mb-6">
             {content.title}
           </h2>
-          <p className="font-accent italic text-malamaya-light text-lg max-w-lg whitespace-pre-line">
-            {content.subtitle}
-          </p>
+          <div
+            className="site-rich-text site-rich-text--accent font-accent italic text-malamaya-light text-lg max-w-lg"
+            dangerouslySetInnerHTML={{ __html: content.subtitle }}
+          />
         </motion.div>
 
         {/* Tags */}

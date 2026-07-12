@@ -32,7 +32,7 @@ interface ContactContent {
 
 const defaults: ContactContent = {
   title: "Join the Cult",
-  subtitle: "Want to build something deviant?\nLeave a trace. Light a candle.",
+  subtitle: "<p>Want to build something deviant?</p><p>Leave a trace. Light a candle.</p>",
   socialTitle: "Find us in the periphery",
   socialLinks: [
     { label: "X (Twitter)", href: "https://twitter.com", icon: "", iconId: "x", showLabel: true },
@@ -126,9 +126,10 @@ export default function ContactSection() {
           <h2 className="font-display text-4xl md:text-5xl mb-6">
             {content.title}
           </h2>
-          <p className="font-accent italic text-malamaya-light text-lg whitespace-pre-line">
-            {content.subtitle}
-          </p>
+          <div
+            className="site-rich-text site-rich-text--accent font-accent italic text-malamaya-light text-lg"
+            dangerouslySetInnerHTML={{ __html: content.subtitle }}
+          />
         </motion.div>
 
         {submitted ? (

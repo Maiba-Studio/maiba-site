@@ -64,7 +64,7 @@ export default function RichTextEditor({ content, onChange, placeholder }: Props
     editorProps: {
       attributes: {
         class:
-          "min-h-[200px] sm:min-h-[300px] px-3 sm:px-4 py-3 text-foreground text-sm leading-7 focus:outline-none prose-headings:font-display prose-headings:text-foreground prose-p:text-malamaya-light prose-a:text-maiba-red prose-strong:text-foreground prose-blockquote:border-malamaya-border prose-blockquote:text-malamaya-light prose-code:text-maiba-red prose-code:bg-malamaya-border/20 prose-code:px-1 prose-code:rounded-sm prose-hr:border-malamaya-border/30 prose-img:rounded-sm prose-img:border prose-img:border-malamaya-border/20",
+          "min-h-[160px] sm:min-h-[240px] px-3 sm:px-4 py-3 text-foreground text-sm leading-7 focus:outline-none break-words whitespace-pre-wrap prose-headings:font-display prose-headings:text-foreground prose-p:text-malamaya-light prose-a:text-maiba-red prose-strong:text-foreground prose-blockquote:border-malamaya-border prose-blockquote:text-malamaya-light prose-code:text-maiba-red prose-code:bg-malamaya-border/20 prose-code:px-1 prose-code:rounded-sm prose-hr:border-malamaya-border/30 prose-img:rounded-sm prose-img:border prose-img:border-malamaya-border/20",
       },
     },
   });
@@ -84,7 +84,7 @@ export default function RichTextEditor({ content, onChange, placeholder }: Props
   };
 
   return (
-    <div className="border border-malamaya-border rounded-sm overflow-hidden">
+    <div className="border border-malamaya-border rounded-sm overflow-hidden min-w-0">
       <div className="flex flex-wrap gap-0.5 px-2 py-1.5 border-b border-malamaya-border bg-midnight/50">
         <ToolBtn
           onClick={() => editor.chain().focus().toggleBold().run()}
