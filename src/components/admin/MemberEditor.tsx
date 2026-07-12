@@ -17,9 +17,18 @@ const emptyMember = (): MemberFormState => ({
   role: "",
   headline: "",
   image: "",
+  bioTitle: "Bio",
   bioHtml: "",
-  areasTitle: "Areas of Work",
+  areasTitle: "Disciplines",
   areas: [],
+  selectedWorkTitle: "Selected Work",
+  selectedWorkHtml: "",
+  alterEgoEnabled: false,
+  alterEgoName: "",
+  alterEgoRole: "",
+  alterEgoHeadline: "",
+  alterEgoImage: "",
+  alterEgoBioHtml: "",
   connectTitle: "Connect",
   socialLinks: [],
   locationNote: "",
@@ -28,6 +37,38 @@ const emptyMember = (): MemberFormState => ({
   seoTitle: "",
   seoDescription: "",
 });
+
+function formFromMember(data: StudioMember): MemberFormState {
+  return {
+    slug: data.slug || "",
+    name: data.name || "",
+    role: data.role || "",
+    headline: data.headline || "",
+    image: data.image || "",
+    bioTitle: data.bioTitle || "Bio",
+    bioHtml: data.bioHtml || "",
+    areasTitle: data.areasTitle || "Disciplines",
+    areas: data.areas || [],
+    selectedWorkTitle: data.selectedWorkTitle || "Selected Work",
+    selectedWorkHtml: data.selectedWorkHtml || "",
+    alterEgoEnabled: data.alterEgoEnabled === true,
+    alterEgoName: data.alterEgoName || "",
+    alterEgoRole: data.alterEgoRole || "",
+    alterEgoHeadline: data.alterEgoHeadline || "",
+    alterEgoImage: data.alterEgoImage || "",
+    alterEgoBioHtml: data.alterEgoBioHtml || "",
+    connectTitle: data.connectTitle || "Connect",
+    socialLinks: (data.socialLinks || []).map((l: SocialLink) => ({
+      ...l,
+      showLabel: l.showLabel !== false,
+    })),
+    locationNote: data.locationNote || "",
+    published: data.published !== false,
+    noindex: data.noindex === true,
+    seoTitle: data.seoTitle || "",
+    seoDescription: data.seoDescription || "",
+  };
+}
 
 export default function MemberEditorPage({
   memberId,
@@ -52,27 +93,9 @@ export default function MemberEditorPage({
           setError(data.error);
           return;
         }
-        setForm({
-          slug: data.slug || "",
-          name: data.name || "",
-          role: data.role || "",
-          headline: data.headline || "",
-          image: data.image || "",
-          bioHtml: data.bioHtml || "",
-          areasTitle: data.areasTitle || "Areas of Work",
-          areas: data.areas || [],
-          connectTitle: data.connectTitle || "Connect",
-          socialLinks: (data.socialLinks || []).map((l: SocialLink) => ({
-            ...l,
-            showLabel: l.showLabel !== false,
-          })),
-          locationNote: data.locationNote || "",
-          published: data.published !== false,
-          noindex: data.noindex === true,
-          seoTitle: data.seoTitle || "",
-          seoDescription: data.seoDescription || "",
-        });
-        setAreasText((data.areas || []).join("\n"));
+        const next = formFromMember(data);
+        setForm(next);
+        setAreasText((next.areas || []).join("\n"));
       })
       .catch(() => setError("Failed to load member"))
       .finally(() => setLoading(false));
@@ -159,7 +182,7 @@ export default function MemberEditorPage({
               required
             />
           </Field>
-          <Field label="URL Slug" hint="Used in /members/your-slug. Slug “el” also serves /el">
+          <Field label="URL Slug" hint="Slug “el” also serves /el">
             <input
               type="text"
               value={form.slug}
@@ -170,17 +193,17 @@ export default function MemberEditorPage({
           </Field>
         </div>
 
-        <Field label="Role / Title">
+        <Field label="Role / Eyebrow">
           <textarea
             value={form.role}
             onChange={(e) => patch({ role: e.target.value })}
             rows={2}
             className="admin-input"
-            placeholder="Creative Technologist · Founder & Imagineer"
+            placeholder="Artist · Founder · Imagineer"
           />
         </Field>
 
-        <Field label="Headline" hint="Optional short lead under the role">
+        <Field label="Headline" hint="Italic line under the name">
           <textarea
             value={form.headline}
             onChange={(e) => patch({ headline: e.target.value })}
@@ -208,10 +231,18 @@ export default function MemberEditorPage({
               unoptimized={form.image.startsWith("http")}
               className="w-16 h-16 rounded-full object-cover border border-malamaya-border/30"
             />
-            <span className="text-malamaya text-xs">Preview</span>
+            <span className="text-malamaya text-xs">Primary preview</span>
           </div>
         )}
 
+        <Field label="Bio Section Title">
+          <input
+            type="text"
+            value={form.bioTitle}
+            onChange={(e) => patch({ bioTitle: e.target.value })}
+            className="admin-input"
+          />
+        </Field>
         <Field label="Bio">
           <RichTextEditor
             content={form.bioHtml}
@@ -220,7 +251,7 @@ export default function MemberEditorPage({
           />
         </Field>
 
-        <Field label="Areas Section Title">
+        <Field label="Disciplines Section Title">
           <input
             type="text"
             value={form.areasTitle}
@@ -228,7 +259,7 @@ export default function MemberEditorPage({
             className="admin-input"
           />
         </Field>
-        <Field label="Areas of Work" hint="One per line">
+        <Field label="Disciplines" hint="One per line">
           <textarea
             value={areasText}
             onChange={(e) => setAreasText(e.target.value)}
@@ -236,6 +267,103 @@ export default function MemberEditorPage({
             className="admin-input"
           />
         </Field>
+
+        <Field label="Selected Work Title">
+          <input
+            type="text"
+            value={form.selectedWorkTitle}
+            onChange={(e) => patch({ selectedWorkTitle: e.target.value })}
+            className="admin-input"
+          />
+        </Field>
+        <Field label="Selected Work">
+          <RichTextEditor
+            content={form.selectedWorkHtml}
+            onChange={(html) => patch({ selectedWorkHtml: html })}
+            placeholder="Selected work / portfolio notes..."
+          />
+        </Field>
+
+        <div className="border border-malamaya-border/20 rounded-sm p-4 sm:p-5 space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <p className="text-xs tracking-widest uppercase text-malamaya-light">
+              Alter Ego Toggle
+            </p>
+            <label className="flex items-center gap-3 text-sm text-malamaya-light">
+              <input
+                type="checkbox"
+                checked={form.alterEgoEnabled}
+                onChange={(e) => patch({ alterEgoEnabled: e.target.checked })}
+                className="accent-maiba-red"
+              />
+              Enable photo / name / bio toggle
+            </label>
+          </div>
+          <p className="text-malamaya-border text-xs">
+            Visitors click the portrait to switch between primary and alter ego content.
+          </p>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <Field label="Alter Ego Name">
+              <input
+                type="text"
+                value={form.alterEgoName}
+                onChange={(e) => patch({ alterEgoName: e.target.value })}
+                className="admin-input"
+                placeholder="Gamotwox"
+              />
+            </Field>
+            <Field label="Alter Ego Role">
+              <input
+                type="text"
+                value={form.alterEgoRole}
+                onChange={(e) => patch({ alterEgoRole: e.target.value })}
+                className="admin-input"
+                placeholder="The Seeker · Moth Cultist"
+              />
+            </Field>
+          </div>
+
+          <Field label="Alter Ego Headline">
+            <textarea
+              value={form.alterEgoHeadline}
+              onChange={(e) => patch({ alterEgoHeadline: e.target.value })}
+              rows={3}
+              className="admin-input"
+            />
+          </Field>
+
+          <Field label="Alter Ego Portrait URL">
+            <input
+              type="text"
+              value={form.alterEgoImage}
+              onChange={(e) => patch({ alterEgoImage: e.target.value })}
+              className="admin-input"
+              placeholder="/images/alter-ego-placeholder.png"
+            />
+          </Field>
+          {form.alterEgoImage && (
+            <div className="flex items-center gap-4">
+              <Image
+                src={form.alterEgoImage}
+                alt="Alter ego preview"
+                width={64}
+                height={64}
+                unoptimized={form.alterEgoImage.startsWith("http")}
+                className="w-16 h-16 rounded-full object-cover border border-malamaya-border/30"
+              />
+              <span className="text-malamaya text-xs">Alter ego preview</span>
+            </div>
+          )}
+
+          <Field label="Alter Ego Bio">
+            <RichTextEditor
+              content={form.alterEgoBioHtml}
+              onChange={(html) => patch({ alterEgoBioHtml: html })}
+              placeholder="Alter ego bio..."
+            />
+          </Field>
+        </div>
 
         <Field label="Connect Section Title">
           <input

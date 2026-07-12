@@ -35,9 +35,19 @@ export interface StudioMember {
   role: string;
   headline: string;
   image: string;
+  bioTitle: string;
   bioHtml: string;
   areasTitle: string;
   areas: string[];
+  selectedWorkTitle: string;
+  selectedWorkHtml: string;
+  /** Second persona toggled via the profile photo */
+  alterEgoEnabled: boolean;
+  alterEgoName: string;
+  alterEgoRole: string;
+  alterEgoHeadline: string;
+  alterEgoImage: string;
+  alterEgoBioHtml: string;
   connectTitle: string;
   socialLinks: SocialLink[];
   locationNote: string;
@@ -421,6 +431,18 @@ function normalizeSocialLink(link: SocialLink): SocialLink {
 
 function normalizeMemberRecord(raw: Partial<StudioMember>): StudioMember {
   const defaults = getDefaultMembers()[0];
+  const isDefaultEl = raw.id === defaults.id || raw.slug === "el";
+  const alterEgoName =
+    raw.alterEgoName ?? (isDefaultEl ? defaults.alterEgoName : "");
+  const alterEgoImage =
+    raw.alterEgoImage ?? (isDefaultEl ? defaults.alterEgoImage : "");
+  const alterEgoBioHtml =
+    typeof raw.alterEgoBioHtml === "string"
+      ? raw.alterEgoBioHtml
+      : isDefaultEl
+        ? defaults.alterEgoBioHtml
+        : "";
+
   return {
     ...defaults,
     ...raw,
@@ -428,11 +450,29 @@ function normalizeMemberRecord(raw: Partial<StudioMember>): StudioMember {
     slug: raw.slug || "member",
     name: raw.name || "Untitled",
     role: raw.role || "",
-    headline: raw.headline || "",
+    headline: raw.headline || (isDefaultEl ? defaults.headline : ""),
     image: raw.image || "",
+    bioTitle: raw.bioTitle || "Bio",
     bioHtml: typeof raw.bioHtml === "string" ? raw.bioHtml : defaults.bioHtml,
-    areasTitle: raw.areasTitle || "Areas of Work",
+    areasTitle: raw.areasTitle || "Disciplines",
     areas: Array.isArray(raw.areas) ? raw.areas.filter(Boolean) : defaults.areas,
+    selectedWorkTitle: raw.selectedWorkTitle || "Selected Work",
+    selectedWorkHtml:
+      typeof raw.selectedWorkHtml === "string"
+        ? raw.selectedWorkHtml
+        : isDefaultEl
+          ? defaults.selectedWorkHtml
+          : "",
+    alterEgoEnabled:
+      raw.alterEgoEnabled === true ||
+      (raw.alterEgoEnabled === undefined && Boolean(alterEgoName || alterEgoImage)),
+    alterEgoName,
+    alterEgoRole:
+      raw.alterEgoRole ?? (isDefaultEl ? defaults.alterEgoRole : ""),
+    alterEgoHeadline:
+      raw.alterEgoHeadline ?? (isDefaultEl ? defaults.alterEgoHeadline : ""),
+    alterEgoImage,
+    alterEgoBioHtml,
     connectTitle: raw.connectTitle || "Connect",
     socialLinks: Array.isArray(raw.socialLinks)
       ? raw.socialLinks.map(normalizeSocialLink)
@@ -463,9 +503,11 @@ function getDefaultMembers(): StudioMember[] {
       id: "member-el-bonuan",
       slug: "el",
       name: "EL Bonuan",
-      role: "Creative Technologist · Founder & Imagineer, Maiba Studio",
-      headline: "",
+      role: "Artist · Founder · Imagineer",
+      headline:
+        "A cultural deviant working across art, AI, Web3, and interior space, building at the edge where ritual, technology, and personal myth collide.",
       image: "/images/founder-placeholder.png",
+      bioTitle: "Bio",
       bioHtml: [
         "<p>I'm a Filipino multidisciplinary creative working at the intersection of <strong>design, art, artificial intelligence, immersive technology, games, and emerging digital platforms</strong>.</p>",
         "<p>Through <strong>Maiba Studio</strong>, I develop creative technology projects, digital products, brand experiences, and experimental systems that combine strong visual direction with practical innovation.</p>",
@@ -479,7 +521,7 @@ function getDefaultMembers(): StudioMember[] {
         "</ul>",
         "<p>My creative practice also exists under the name <strong>Gamotwox</strong>, exploring art, mythology, technology, and the pursuit of light through uncertainty.</p>",
       ].join(""),
-      areasTitle: "Areas of Work",
+      areasTitle: "Disciplines",
       areas: [
         "Creative Direction",
         "Product Design",
@@ -491,6 +533,20 @@ function getDefaultMembers(): StudioMember[] {
         "Web3",
         "Brand Strategy",
       ],
+      selectedWorkTitle: "Selected Work",
+      selectedWorkHtml:
+        "<p>Portfolio details can be expanded through future content updates. For now, the live Maiba archive carries the public body of field notes, studies, and studio fragments.</p>",
+      alterEgoEnabled: true,
+      alterEgoName: "Gamotwox",
+      alterEgoRole: "The Seeker · Moth Cultist",
+      alterEgoHeadline:
+        "A moth cultist following light through shadow — part archive, part ritual, part experiment in becoming.",
+      alterEgoImage: "/images/alter-ego-placeholder.png",
+      alterEgoBioHtml: [
+        "<p><strong>Gamotwox</strong> is the alter ego of EL Bonuan — the seeker side of the practice, where mythology, technology, and devotion to the light meet.</p>",
+        "<p>Through this persona, the work explores art that refuses easy categories: ritual as method, deviation as craft, and uncertainty as the path.</p>",
+        "<p>Where EL builds systems and studios in the open, Gamotwox moves through the periphery — gathering sparks, following flame, and remembering what it means to burn bright.</p>",
+      ].join(""),
       connectTitle: "Connect",
       socialLinks: [
         { label: "Website", href: "https://maiba.studio", icon: "", iconId: "website", showLabel: true },

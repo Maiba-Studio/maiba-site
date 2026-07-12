@@ -242,9 +242,18 @@ export function parseStudioMemberInput(value: unknown): StudioMemberInput | null
     role: stringValue(value.role),
     headline: stringValue(value.headline),
     image: normalizeUrl(value.image),
+    bioTitle: stringValue(value.bioTitle, "Bio"),
     bioHtml: richTextField(value.bioHtml),
-    areasTitle: stringValue(value.areasTitle, "Areas of Work"),
+    areasTitle: stringValue(value.areasTitle, "Disciplines"),
     areas: stringArray(value.areas),
+    selectedWorkTitle: stringValue(value.selectedWorkTitle, "Selected Work"),
+    selectedWorkHtml: richTextField(value.selectedWorkHtml),
+    alterEgoEnabled: value.alterEgoEnabled === true,
+    alterEgoName: stringValue(value.alterEgoName),
+    alterEgoRole: stringValue(value.alterEgoRole),
+    alterEgoHeadline: stringValue(value.alterEgoHeadline),
+    alterEgoImage: normalizeUrl(value.alterEgoImage),
+    alterEgoBioHtml: richTextField(value.alterEgoBioHtml),
     connectTitle: stringValue(value.connectTitle, "Connect"),
     socialLinks: parseSocialLinks(value.socialLinks),
     locationNote: stringValue(value.locationNote),
@@ -267,9 +276,20 @@ export function parseStudioMemberPatch(
   if ("role" in value) patch.role = stringValue(value.role);
   if ("headline" in value) patch.headline = stringValue(value.headline);
   if ("image" in value) patch.image = normalizeUrl(value.image);
+  if ("bioTitle" in value) patch.bioTitle = stringValue(value.bioTitle, "Bio");
   if ("bioHtml" in value) patch.bioHtml = richTextField(value.bioHtml);
-  if ("areasTitle" in value) patch.areasTitle = stringValue(value.areasTitle, "Areas of Work");
+  if ("areasTitle" in value) patch.areasTitle = stringValue(value.areasTitle, "Disciplines");
   if ("areas" in value) patch.areas = stringArray(value.areas);
+  if ("selectedWorkTitle" in value) {
+    patch.selectedWorkTitle = stringValue(value.selectedWorkTitle, "Selected Work");
+  }
+  if ("selectedWorkHtml" in value) patch.selectedWorkHtml = richTextField(value.selectedWorkHtml);
+  if ("alterEgoEnabled" in value) patch.alterEgoEnabled = value.alterEgoEnabled === true;
+  if ("alterEgoName" in value) patch.alterEgoName = stringValue(value.alterEgoName);
+  if ("alterEgoRole" in value) patch.alterEgoRole = stringValue(value.alterEgoRole);
+  if ("alterEgoHeadline" in value) patch.alterEgoHeadline = stringValue(value.alterEgoHeadline);
+  if ("alterEgoImage" in value) patch.alterEgoImage = normalizeUrl(value.alterEgoImage);
+  if ("alterEgoBioHtml" in value) patch.alterEgoBioHtml = richTextField(value.alterEgoBioHtml);
   if ("connectTitle" in value) patch.connectTitle = stringValue(value.connectTitle, "Connect");
   if ("socialLinks" in value) patch.socialLinks = parseSocialLinks(value.socialLinks);
   if ("locationNote" in value) patch.locationNote = stringValue(value.locationNote);
