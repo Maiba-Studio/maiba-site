@@ -1,4 +1,4 @@
-import type { FieldNote, LampWord, SiteContent, UserRole } from "@/lib/data";
+import type { FieldNote, LampWord, SiteContent, SocialLink, StudioMember, UserRole } from "@/lib/data";
 import { prepareFieldNoteBody, richTextField } from "@/lib/sanitize";
 
 const USER_ROLES = ["admin", "moderator"] as const;
@@ -48,13 +48,29 @@ function normalizeUrl(value: unknown, { allowRelative = true } = {}): string {
 
   try {
     const parsed = new URL(raw);
-    if (["http:", "https:", "mailto:"].includes(parsed.protocol)) return raw;
+    if (["http:", "https:", "mailto:", "tel:"].includes(parsed.protocol)) return raw;
   } catch {
     return "";
   }
 
   return "";
 }
+
+export function parseSocialLinks(value: unknown): SocialLink[] {
+  if (!Array.isArray(value)) return [];
+  return value
+    .filter(isRecord)
+    .map((link) => ({
+      label: stringValue(link.label),
+      href: normalizeUrl(link.href),
+      icon: normalizeUrl(link.icon),
+      iconId: stringValue(link.iconId),
+      showLabel: link.showLabel !== false,
+    }))
+    .filter((link) => link.label && link.href);
+}
+
+type StudioMemberInput = Omit<StudioMember, "id" | "createdAt" | "updatedAt">;
 
 export function parseFieldNoteInput(value: unknown): FieldNoteInput | null {
   if (!isRecord(value)) return null;
@@ -202,18 +218,7 @@ export function parseSiteContent(value: unknown): SiteContent | null {
       title: stringValue(content.contact.title),
       subtitle: richTextField(content.contact.subtitle),
       socialTitle: stringValue(content.contact.socialTitle),
-      socialLinks: Array.isArray(content.contact.socialLinks)
-        ? content.contact.socialLinks
-            .filter(isRecord)
-            .map((link) => ({
-              label: stringValue(link.label),
-              href: normalizeUrl(link.href),
-              icon: normalizeUrl(link.icon),
-              iconId: stringValue(link.iconId),
-              showLabel: link.showLabel !== false,
-            }))
-            .filter((link) => link.label && link.href)
-        : [],
+      socialLinks: parseSocialLinks(content.contact.socialLinks),
     },
     ritual: {
       title: stringValue(content.ritual.title),
@@ -223,5 +228,56 @@ export function parseSiteContent(value: unknown): SiteContent | null {
       closingAttribution: stringValue(content.ritual.closingAttribution),
     },
   };
+}
+
+export function parseStudioMemberInput(value: unknown): StudioMemberInput | null {
+  if (!isRecord(value)) return null;
+
+  const name = stringValue(value.name);
+  if (!name) return null;
+
+  return {
+    slug: normalizeSlug(value.slug || name),
+    name,
+    role: stringValue(value.role),
+    headline: stringValue(value.headline),
+    image: normalizeUrl(value.image),
+    bioHtml: richTextField(value.bioHtml),
+    areasTitle: stringValue(value.areasTitle, "Areas of Work"),
+    areas: stringArray(value.areas),
+    connectTitle: stringValue(value.connectTitle, "Connect"),
+    socialLinks: parseSocialLinks(value.socialLinks),
+    locationNote: stringValue(value.locationNote),
+    published: value.published !== false,
+    noindex: value.noindex === true,
+    seoTitle: stringValue(value.seoTitle),
+    seoDescription: stringValue(value.seoDescription),
+  };
+}
+
+export function parseStudioMemberPatch(
+  value: unknown
+): Partial<Omit<StudioMember, "id" | "createdAt">> | null {
+  if (!isRecord(value)) return null;
+
+  const patch: Partial<Omit<StudioMember, "id" | "createdAt">> = {};
+
+  if ("slug" in value) patch.slug = normalizeSlug(value.slug);
+  if ("name" in value) patch.name = stringValue(value.name);
+  if ("role" in value) patch.role = stringValue(value.role);
+  if ("headline" in value) patch.headline = stringValue(value.headline);
+  if ("image" in value) patch.image = normalizeUrl(value.image);
+  if ("bioHtml" in value) patch.bioHtml = richTextField(value.bioHtml);
+  if ("areasTitle" in value) patch.areasTitle = stringValue(value.areasTitle, "Areas of Work");
+  if ("areas" in value) patch.areas = stringArray(value.areas);
+  if ("connectTitle" in value) patch.connectTitle = stringValue(value.connectTitle, "Connect");
+  if ("socialLinks" in value) patch.socialLinks = parseSocialLinks(value.socialLinks);
+  if ("locationNote" in value) patch.locationNote = stringValue(value.locationNote);
+  if ("published" in value) patch.published = value.published === true;
+  if ("noindex" in value) patch.noindex = value.noindex === true;
+  if ("seoTitle" in value) patch.seoTitle = stringValue(value.seoTitle);
+  if ("seoDescription" in value) patch.seoDescription = stringValue(value.seoDescription);
+
+  return patch;
 }
 

@@ -3,14 +3,14 @@ import { notFound } from "next/navigation";
 import MemberProfile from "@/components/MemberProfile";
 import { getPublishedMember } from "@/lib/data";
 
-export async function generateMetadata(): Promise<Metadata> {
-  const member = await getPublishedMember("el");
-  if (!member) {
-    return {
-      title: "EL Bonuan",
-      robots: { index: false, follow: false },
-    };
-  }
+type Props = {
+  params: Promise<{ slug: string }>;
+};
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { slug } = await params;
+  const member = await getPublishedMember(slug);
+  if (!member) return { title: "Not Found" };
 
   return {
     title: member.seoTitle || member.name,
@@ -26,8 +26,9 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-export default async function ELBonuanPage() {
-  const member = await getPublishedMember("el");
+export default async function MemberPage({ params }: Props) {
+  const { slug } = await params;
+  const member = await getPublishedMember(slug);
   if (!member) notFound();
   return <MemberProfile member={member} />;
 }

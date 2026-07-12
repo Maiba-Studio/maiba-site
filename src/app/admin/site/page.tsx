@@ -2,11 +2,10 @@
 
 import Image from "next/image";
 import { useEffect, useState, FormEvent } from "react";
-import { ChevronUp, ChevronDown, GripVertical } from "lucide-react";
 import AdminShell from "@/components/admin/AdminShell";
 import RichTextEditor from "@/components/admin/RichTextEditor";
+import SocialLinksEditor from "@/components/admin/SocialLinksEditor";
 import type { SiteContent, SocialLink, LampWord } from "@/lib/data";
-import { SOCIAL_ICON_PRESETS, SocialIconRenderer } from "@/lib/social-icons";
 
 type Tab = "hero" | "about" | "archive" | "contact" | "ritual" | "lamp";
 
@@ -179,48 +178,6 @@ export default function SiteContentPage() {
   const updateArchive = (patch: Partial<SiteContent["archive"]>) =>
     setContent({ ...content, archive: { ...content.archive, ...patch } });
 
-  const updateSocialLink = (index: number, patch: Partial<SocialLink>) => {
-    const links = [...content.contact.socialLinks];
-    links[index] = { ...links[index], ...patch };
-    setContent({
-      ...content,
-      contact: { ...content.contact, socialLinks: links },
-    });
-  };
-
-  const addSocialLink = () => {
-    setContent({
-      ...content,
-      contact: {
-        ...content.contact,
-        socialLinks: [
-          ...content.contact.socialLinks,
-          { label: "", href: "", icon: "", iconId: "x", showLabel: true },
-        ],
-      },
-    });
-  };
-
-  const removeSocialLink = (index: number) => {
-    setContent({
-      ...content,
-      contact: {
-        ...content.contact,
-        socialLinks: content.contact.socialLinks.filter((_, i) => i !== index),
-      },
-    });
-  };
-
-  const moveSocialLink = (from: number, to: number) => {
-    const links = [...content.contact.socialLinks];
-    const [item] = links.splice(from, 1);
-    links.splice(to, 0, item);
-    setContent({
-      ...content,
-      contact: { ...content.contact, socialLinks: links },
-    });
-  };
-
   return (
     <AdminShell>
       <div className="mb-8">
@@ -391,127 +348,15 @@ export default function SiteContentPage() {
               <input type="text" value={content.contact.socialTitle} onChange={(e) => setContent({ ...content, contact: { ...content.contact, socialTitle: e.target.value } })} className="admin-input" />
             </Field>
 
-            <div>
-              <div className="flex items-center justify-between mb-3">
-                <label className="text-xs tracking-widest uppercase text-malamaya">
-                  Social Links
-                </label>
-                <button
-                  type="button"
-                  onClick={addSocialLink}
-                  className="text-xs text-maiba-red hover:text-maiba-red/80 transition-colors tracking-widest uppercase"
-                >
-                  + Add Link
-                </button>
-              </div>
-
-              <div className="space-y-3">
-                {content.contact.socialLinks.map((link, i) => (
-                  <div key={i} className="border border-malamaya-border/20 rounded-sm overflow-hidden">
-                    <div className="flex items-center gap-2 px-4 py-2 bg-white/[0.02] border-b border-malamaya-border/10">
-                      <GripVertical className="w-3.5 h-3.5 text-malamaya-border/60 flex-shrink-0" strokeWidth={1.5} />
-                      <div className="w-6 h-6 flex items-center justify-center text-foreground flex-shrink-0">
-                        <SocialIconRenderer
-                          iconId={link.iconId || ""}
-                          customIconUrl={link.icon}
-                          size={14}
-                        />
-                      </div>
-                      <span className="text-xs text-malamaya-light truncate flex-1">
-                        {link.label || "Untitled link"}
-                      </span>
-                      <div className="flex items-center gap-1 flex-shrink-0">
-                        <button
-                          type="button"
-                          onClick={() => moveSocialLink(i, i - 1)}
-                          disabled={i === 0}
-                          className="w-6 h-6 flex items-center justify-center text-malamaya hover:text-foreground disabled:opacity-20 disabled:cursor-not-allowed transition-colors"
-                          title="Move up"
-                        >
-                          <ChevronUp className="w-3.5 h-3.5" strokeWidth={2} />
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => moveSocialLink(i, i + 1)}
-                          disabled={i === content.contact.socialLinks.length - 1}
-                          className="w-6 h-6 flex items-center justify-center text-malamaya hover:text-foreground disabled:opacity-20 disabled:cursor-not-allowed transition-colors"
-                          title="Move down"
-                        >
-                          <ChevronDown className="w-3.5 h-3.5" strokeWidth={2} />
-                        </button>
-                      </div>
-                    </div>
-
-                    <div className="p-4 space-y-3">
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        <Field label="Label">
-                          <input type="text" value={link.label} onChange={(e) => updateSocialLink(i, { label: e.target.value })} className="admin-input" placeholder="Display name" />
-                        </Field>
-                        <Field label="URL">
-                          <input type="text" value={link.href} onChange={(e) => updateSocialLink(i, { href: e.target.value })} className="admin-input" placeholder="https://..." />
-                        </Field>
-                      </div>
-
-                      <Field label="Icon">
-                        <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 flex items-center justify-center border border-malamaya-border/30 rounded-sm bg-midnight/50 flex-shrink-0 text-foreground">
-                            <SocialIconRenderer
-                              iconId={link.iconId || ""}
-                              customIconUrl={link.icon}
-                              size={18}
-                            />
-                          </div>
-                          <select
-                            value={link.iconId || "custom"}
-                            onChange={(e) => updateSocialLink(i, { iconId: e.target.value })}
-                            className="admin-input flex-1"
-                          >
-                            {SOCIAL_ICON_PRESETS.map((preset) => (
-                              <option key={preset.id} value={preset.id}>
-                                {preset.label}
-                              </option>
-                            ))}
-                            <option value="custom">Custom Image URL</option>
-                          </select>
-                        </div>
-                      </Field>
-
-                      <label className="flex items-center gap-3 text-sm text-malamaya-light">
-                        <input
-                          type="checkbox"
-                          checked={link.showLabel !== false}
-                          onChange={(e) => updateSocialLink(i, { showLabel: e.target.checked })}
-                          className="accent-maiba-red"
-                        />
-                        Show label next to icon on the public site
-                      </label>
-
-                      {(link.iconId === "custom" || (!link.iconId && link.icon)) && (
-                        <Field label="Custom Icon URL" hint="direct link to an image">
-                          <input
-                            type="text"
-                            value={link.icon}
-                            onChange={(e) => updateSocialLink(i, { icon: e.target.value })}
-                            className="admin-input"
-                            placeholder="https://example.com/icon.svg"
-                          />
-                        </Field>
-                      )}
-
-                      <div className="flex justify-end">
-                        <button
-                          type="button"
-                          onClick={() => removeSocialLink(i)}
-                          className="text-[10px] text-maiba-red/60 hover:text-maiba-red tracking-widest uppercase transition-colors"
-                        >
-                          Remove
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
+            <SocialLinksEditor
+              links={content.contact.socialLinks}
+              onChange={(socialLinks) =>
+                setContent({
+                  ...content,
+                  contact: { ...content.contact, socialLinks },
+                })
+              }
+            />
           </>
         )}
 

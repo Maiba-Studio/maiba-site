@@ -28,6 +28,27 @@ export interface SocialLink {
   showLabel?: boolean;
 }
 
+export interface StudioMember {
+  id: string;
+  slug: string;
+  name: string;
+  role: string;
+  headline: string;
+  image: string;
+  bioHtml: string;
+  areasTitle: string;
+  areas: string[];
+  connectTitle: string;
+  socialLinks: SocialLink[];
+  locationNote: string;
+  published: boolean;
+  noindex: boolean;
+  seoTitle: string;
+  seoDescription: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface SiteContent {
   hero: {
     title: string;
@@ -299,6 +320,198 @@ export async function deleteLampWord(id: string): Promise<boolean> {
   if (filtered.length === words.length) return false;
   await saveLampWords(filtered);
   return true;
+}
+
+// --- Studio Members ---
+
+export async function getMembers(): Promise<StudioMember[]> {
+  const saved = await readJSON<StudioMember[]>("members.json", getDefaultMembers());
+  if (!Array.isArray(saved) || saved.length === 0) {
+    const defaults = getDefaultMembers();
+    await writeJSON("members.json", defaults);
+    return defaults;
+  }
+  return saved.map(normalizeMemberRecord);
+}
+
+export async function getPublishedMembers(): Promise<StudioMember[]> {
+  const members = await getMembers();
+  return members.filter((m) => m.published);
+}
+
+export async function getMember(idOrSlug: string): Promise<StudioMember | null> {
+  const members = await getMembers();
+  return members.find((m) => m.id === idOrSlug || m.slug === idOrSlug) ?? null;
+}
+
+export async function getPublishedMember(idOrSlug: string): Promise<StudioMember | null> {
+  const member = await getMember(idOrSlug);
+  if (!member || !member.published) return null;
+  return member;
+}
+
+export async function saveMembers(members: StudioMember[]) {
+  await writeJSON("members.json", members);
+}
+
+export async function createMember(
+  data: Omit<StudioMember, "id" | "createdAt" | "updatedAt">
+): Promise<StudioMember> {
+  const members = await getMembers();
+  const now = new Date().toISOString();
+  const member: StudioMember = {
+    ...data,
+    id: uuid(),
+    slug: uniqueMemberSlug(data.slug || data.name, members),
+    socialLinks: (data.socialLinks ?? []).map(normalizeSocialLink),
+    createdAt: now,
+    updatedAt: now,
+  };
+  members.push(member);
+  await saveMembers(members);
+  return member;
+}
+
+export async function updateMember(
+  id: string,
+  data: Partial<Omit<StudioMember, "id" | "createdAt">>
+): Promise<StudioMember | null> {
+  const members = await getMembers();
+  const idx = members.findIndex((m) => m.id === id);
+  if (idx === -1) return null;
+
+  const nextSlug =
+    data.slug !== undefined
+      ? uniqueMemberSlug(
+          data.slug || members[idx].name,
+          members.filter((m) => m.id !== id)
+        )
+      : members[idx].slug;
+
+  members[idx] = {
+    ...members[idx],
+    ...data,
+    slug: nextSlug,
+    socialLinks: data.socialLinks
+      ? data.socialLinks.map(normalizeSocialLink)
+      : members[idx].socialLinks,
+    updatedAt: new Date().toISOString(),
+  };
+  await saveMembers(members);
+  return members[idx];
+}
+
+export async function deleteMember(id: string): Promise<boolean> {
+  const members = await getMembers();
+  const filtered = members.filter((m) => m.id !== id);
+  if (filtered.length === members.length) return false;
+  await saveMembers(filtered);
+  return true;
+}
+
+function normalizeSocialLink(link: SocialLink): SocialLink {
+  return {
+    label: link.label || "",
+    href: link.href || "",
+    icon: link.icon || "",
+    iconId: link.iconId || "",
+    showLabel: link.showLabel !== false,
+  };
+}
+
+function normalizeMemberRecord(raw: Partial<StudioMember>): StudioMember {
+  const defaults = getDefaultMembers()[0];
+  return {
+    ...defaults,
+    ...raw,
+    id: raw.id || uuid(),
+    slug: raw.slug || "member",
+    name: raw.name || "Untitled",
+    role: raw.role || "",
+    headline: raw.headline || "",
+    image: raw.image || "",
+    bioHtml: typeof raw.bioHtml === "string" ? raw.bioHtml : defaults.bioHtml,
+    areasTitle: raw.areasTitle || "Areas of Work",
+    areas: Array.isArray(raw.areas) ? raw.areas.filter(Boolean) : defaults.areas,
+    connectTitle: raw.connectTitle || "Connect",
+    socialLinks: Array.isArray(raw.socialLinks)
+      ? raw.socialLinks.map(normalizeSocialLink)
+      : defaults.socialLinks,
+    locationNote: raw.locationNote || "",
+    published: raw.published !== false,
+    noindex: raw.noindex === true,
+    seoTitle: raw.seoTitle || "",
+    seoDescription: raw.seoDescription || "",
+    createdAt: raw.createdAt || new Date().toISOString(),
+    updatedAt: raw.updatedAt || new Date().toISOString(),
+  };
+}
+
+function uniqueMemberSlug(value: string, members: StudioMember[]): string {
+  const base = slugify(value) || "member";
+  const used = new Set(members.map((m) => m.slug).filter(Boolean));
+  if (!used.has(base)) return base;
+  let i = 2;
+  while (used.has(`${base}-${i}`)) i += 1;
+  return `${base}-${i}`;
+}
+
+function getDefaultMembers(): StudioMember[] {
+  const now = new Date().toISOString();
+  return [
+    {
+      id: "member-el-bonuan",
+      slug: "el",
+      name: "EL Bonuan",
+      role: "Creative Technologist · Founder & Imagineer, Maiba Studio",
+      headline: "",
+      image: "/images/founder-placeholder.png",
+      bioHtml: [
+        "<p>I'm a Filipino multidisciplinary creative working at the intersection of <strong>design, art, artificial intelligence, immersive technology, games, and emerging digital platforms</strong>.</p>",
+        "<p>Through <strong>Maiba Studio</strong>, I develop creative technology projects, digital products, brand experiences, and experimental systems that combine strong visual direction with practical innovation.</p>",
+        "<p>My work has included:</p>",
+        "<ul>",
+        "<li>Founding <strong>XOVOX Labs</strong>, recognized as the first Philippine-based studio in The Sandbox partner network</li>",
+        "<li>Co-founding <strong>DAOCre-8</strong>, an award-winning decentralized creative funding platform</li>",
+        "<li>Contributing to <strong>Bagyo.App</strong>, an AI-assisted disaster intelligence initiative</li>",
+        "<li>Developing AI, Web3, AR, game, and culture-driven products for startups, communities, and private clients</li>",
+        "<li>Speaking and participating in technology, design, gaming, and creative-industry events</li>",
+        "</ul>",
+        "<p>My creative practice also exists under the name <strong>Gamotwox</strong>, exploring art, mythology, technology, and the pursuit of light through uncertainty.</p>",
+      ].join(""),
+      areasTitle: "Areas of Work",
+      areas: [
+        "Creative Direction",
+        "Product Design",
+        "AI Systems",
+        "Web Applications",
+        "Immersive Experiences",
+        "Games",
+        "AR/XR",
+        "Web3",
+        "Brand Strategy",
+      ],
+      connectTitle: "Connect",
+      socialLinks: [
+        { label: "Website", href: "https://maiba.studio", icon: "", iconId: "website", showLabel: true },
+        { label: "Email", href: "mailto:el@maiba.studio", icon: "", iconId: "email", showLabel: true },
+        { label: "LinkedIn", href: "https://www.linkedin.com/in/elbonuan/", icon: "", iconId: "linkedin", showLabel: true },
+        { label: "Instagram", href: "https://www.instagram.com/elbonuan", icon: "", iconId: "instagram", showLabel: true },
+        { label: "X", href: "https://x.com/ELBonuan", icon: "", iconId: "x", showLabel: true },
+        { label: "TikTok", href: "https://www.tiktok.com/@elbonuan", icon: "", iconId: "tiktok", showLabel: true },
+        { label: "Telegram", href: "https://t.me/n1t0y", icon: "", iconId: "telegram", showLabel: true },
+        { label: "WhatsApp", href: "https://wa.me/639275493367", icon: "", iconId: "whatsapp", showLabel: true },
+      ],
+      locationNote: "Based in the Philippines · Available for select collaborations and projects",
+      published: true,
+      noindex: true,
+      seoTitle: "EL Bonuan",
+      seoDescription:
+        "Creative Technologist, Founder & Imagineer of Maiba Studio — design, art, AI, immersive tech, games, and emerging digital platforms.",
+      createdAt: now,
+      updatedAt: now,
+    },
+  ];
 }
 
 // --- Defaults ---

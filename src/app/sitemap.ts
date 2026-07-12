@@ -1,10 +1,13 @@
 import type { MetadataRoute } from "next";
-import { getPublishedEntries } from "@/lib/data";
+import { getPublishedEntries, getPublishedMembers } from "@/lib/data";
 
 const baseUrl = "https://maiba.studio";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const entries = await getPublishedEntries();
+  const [entries, members] = await Promise.all([
+    getPublishedEntries(),
+    getPublishedMembers(),
+  ]);
   const now = new Date();
 
   const staticRoutes: MetadataRoute.Sitemap = [
@@ -23,6 +26,16 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     lastModified: new Date(entry.updatedAt || entry.createdAt || entry.date),
   }));
 
-  return [...staticRoutes, ...fieldNotes];
+  const memberPages: MetadataRoute.Sitemap = members
+    .filter((m) => !m.noindex)
+    .map((member) => ({
+      url:
+        member.slug === "el"
+          ? `${baseUrl}/el`
+          : `${baseUrl}/members/${member.slug}`,
+      lastModified: new Date(member.updatedAt || member.createdAt),
+    }));
+
+  return [...staticRoutes, ...fieldNotes, ...memberPages];
 }
 
