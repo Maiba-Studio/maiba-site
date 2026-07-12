@@ -10,33 +10,83 @@ const allowedTags = [
   "s",
 ];
 
+const sanitizeOptions: sanitizeHtml.IOptions = {
+  allowedTags,
+  allowedAttributes: {
+    a: ["href", "name", "target", "rel", "class"],
+    img: ["src", "alt", "title", "class"],
+    code: ["class"],
+    pre: ["class"],
+    p: ["class", "style"],
+    h1: ["class", "style"],
+    h2: ["class", "style"],
+    h3: ["class", "style"],
+    blockquote: ["class"],
+    ul: ["class"],
+    ol: ["class"],
+    li: ["class"],
+    span: ["class"],
+    div: ["style"],
+  },
+  allowedStyles: {
+    "*": {
+      "text-align": [/^(left|right|center|justify)$/],
+    },
+  },
+  allowedSchemes: ["http", "https", "mailto"],
+  allowedSchemesByTag: {
+    img: ["http", "https"],
+  },
+  transformTags: {
+    a: sanitizeHtml.simpleTransform("a", {
+      rel: "noopener noreferrer",
+    }),
+  },
+};
+
 export function sanitizeRichText(html: string): string {
-  return sanitizeHtml(html, {
-    allowedTags,
-    allowedAttributes: {
-      a: ["href", "name", "target", "rel", "class"],
-      img: ["src", "alt", "title", "class"],
-      code: ["class"],
-      pre: ["class"],
-      p: ["class"],
-      h1: ["class"],
-      h2: ["class"],
-      h3: ["class"],
-      blockquote: ["class"],
-      ul: ["class"],
-      ol: ["class"],
-      li: ["class"],
-      span: ["class"],
-    },
-    allowedSchemes: ["http", "https", "mailto"],
-    allowedSchemesByTag: {
-      img: ["http", "https"],
-    },
-    transformTags: {
-      a: sanitizeHtml.simpleTransform("a", {
-        rel: "noopener noreferrer",
-      }),
-    },
-  });
+  return sanitizeHtml(html, sanitizeOptions);
+}
+
+function escapeHtml(text: string): string {
+  return text
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
+function decodeBasicEntities(text: string): string {
+  return text
+    .replace(/&nbsp;/gi, " ")
+    .replace(/&lt;/gi, "<")
+    .replace(/&gt;/gi, ">")
+    .replace(/&quot;/gi, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/&#x27;/gi, "'")
+    .replace(/&amp;/gi, "&");
+}
+
+/**
+ * Accidental TipTap code-block-only bodies render as one horizontal line.
+ * Promote a sole <pre><code> wrapper into normal paragraphs for public display.
+ */
+export function prepareFieldNoteBody(html: string): string {
+  const trimmed = html.trim();
+  const match = /^<pre><code(?:\s[^>]*)?>([\s\S]*)<\/code><\/pre>$/i.exec(trimmed);
+
+  if (!match) {
+    return sanitizeRichText(html);
+  }
+
+  const text = decodeBasicEntities(match[1].replace(/<br\s*\/?>/gi, "\n"));
+  const paragraphs = text
+    .split(/\n{2,}/)
+    .map((block) => block.trim())
+    .filter(Boolean)
+    .map((block) => `<p>${escapeHtml(block).replace(/\n/g, "<br>")}</p>`)
+    .join("");
+
+  return sanitizeRichText(paragraphs || `<p>${escapeHtml(text.trim())}</p>`);
 }
 

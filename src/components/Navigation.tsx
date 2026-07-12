@@ -9,6 +9,7 @@ import MothModeToggle from "./MothModeToggle";
 const links = [
   { href: "#home", label: "Home" },
   { href: "#about", label: "About" },
+  { href: "#who", label: "Who" },
   { href: "#archive", label: "Field Notes" },
   { href: "#contact", label: "Join the Cult" },
 ];

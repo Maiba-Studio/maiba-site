@@ -1,5 +1,5 @@
 import type { FieldNote, LampWord, SiteContent, UserRole } from "@/lib/data";
-import { sanitizeRichText } from "@/lib/sanitize";
+import { prepareFieldNoteBody } from "@/lib/sanitize";
 
 const USER_ROLES = ["admin", "moderator"] as const;
 
@@ -82,7 +82,7 @@ export function parseFieldNoteInput(value: unknown): FieldNoteInput | null {
     slug: normalizeSlug(value.slug || title),
     headline: stringValue(value.headline),
     excerpt,
-    body: sanitizeRichText(typeof value.body === "string" ? value.body : ""),
+    body: prepareFieldNoteBody(typeof value.body === "string" ? value.body : ""),
     tag,
     date: stringValue(value.date, new Date().toISOString().slice(0, 10)),
     thumbnail: normalizeUrl(value.thumbnail),
@@ -102,7 +102,7 @@ export function parseFieldNotePatch(value: unknown): Partial<Omit<FieldNote, "id
   if ("slug" in value) patch.slug = normalizeSlug(value.slug);
   if ("headline" in value) patch.headline = stringValue(value.headline);
   if ("excerpt" in value) patch.excerpt = stringValue(value.excerpt);
-  if ("body" in value) patch.body = sanitizeRichText(typeof value.body === "string" ? value.body : "");
+  if ("body" in value) patch.body = prepareFieldNoteBody(typeof value.body === "string" ? value.body : "");
   if ("tag" in value) {
     const tag = normalizeTag(value.tag);
     if (!tag) return null;

@@ -123,7 +123,7 @@ export default function AboutSection() {
       </div>
 
       {/* The Founder */}
-      <div className="max-w-3xl mx-auto px-6 mb-32">
+      <div id="who" className="max-w-3xl mx-auto px-6 mb-32 scroll-mt-28">
         <motion.div {...fadeUp}>
           <p className="text-maiba-red text-xs tracking-[0.3em] uppercase mb-10">
             {content.founderTitle}

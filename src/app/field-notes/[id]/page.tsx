@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { getSession } from "@/lib/auth";
 import { getEntry } from "@/lib/data";
+import { prepareFieldNoteBody } from "@/lib/sanitize";
 
 const tagColors: Record<string, string> = {
   drawing: "text-amber-400 border-amber-400/30",
@@ -170,7 +171,7 @@ export default async function FieldNotePage({ params }: Props) {
         {entry.body && (
           <div
             className="field-note-body mb-12 text-base"
-            dangerouslySetInnerHTML={{ __html: entry.body }}
+            dangerouslySetInnerHTML={{ __html: prepareFieldNoteBody(entry.body) }}
           />
         )}
 
