@@ -264,6 +264,11 @@ export default function EntriesPage() {
                         Draft
                       </span>
                     )}
+                    {entry.published && entry.hideFromHome && (
+                      <span className="text-[10px] tracking-widest uppercase text-malamaya border border-malamaya-border/40 px-2 py-0.5 rounded-sm">
+                        Hidden from home
+                      </span>
+                    )}
                   </div>
                   <h3 className="text-foreground font-display text-base sm:text-lg truncate">
                     {entry.title}

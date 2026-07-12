@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSession } from "@/lib/auth";
-import { getEntries, getPublishedEntries, createEntry } from "@/lib/data";
+import { getEntries, getHomeEntries, createEntry } from "@/lib/data";
 import { hasValidOrigin, invalidOriginResponse } from "@/lib/request-security";
 import { parseFieldNoteInput } from "@/lib/validation";
 
@@ -9,7 +9,7 @@ export async function GET(req: NextRequest) {
   const showAll = req.nextUrl.searchParams.get("all") === "true";
 
   const entries =
-    isAdmin && showAll ? await getEntries() : await getPublishedEntries();
+    isAdmin && showAll ? await getEntries() : await getHomeEntries();
   return NextResponse.json(entries, {
     headers: {
       "Cache-Control": "no-store, no-cache, must-revalidate",

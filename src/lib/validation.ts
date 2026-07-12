@@ -106,6 +106,7 @@ export function parseFieldNoteInput(value: unknown): FieldNoteInput | null {
     links,
     seoTags: stringArray(value.seoTags),
     published: value.published === true,
+    hideFromHome: value.hideFromHome === true,
   };
 }
 
@@ -139,6 +140,7 @@ export function parseFieldNotePatch(value: unknown): Partial<Omit<FieldNote, "id
   }
   if ("seoTags" in value) patch.seoTags = stringArray(value.seoTags);
   if ("published" in value) patch.published = value.published === true;
+  if ("hideFromHome" in value) patch.hideFromHome = value.hideFromHome === true;
 
   return patch;
 }
@@ -244,10 +246,14 @@ export function parseStudioMemberInput(value: unknown): StudioMemberInput | null
     image: normalizeUrl(value.image),
     bioTitle: stringValue(value.bioTitle, "Bio"),
     bioHtml: richTextField(value.bioHtml),
+    showBioCard: value.showBioCard !== false,
     areasTitle: stringValue(value.areasTitle, "Disciplines"),
     areas: stringArray(value.areas),
+    showAreasCard: value.showAreasCard !== false,
     selectedWorkTitle: stringValue(value.selectedWorkTitle, "Selected Work"),
-    selectedWorkHtml: richTextField(value.selectedWorkHtml),
+    selectedWorkIds: stringArray(value.selectedWorkIds),
+    showSelectedWork: value.showSelectedWork !== false,
+    selectedWorkHtml: "",
     alterEgoEnabled: value.alterEgoEnabled === true,
     alterEgoName: stringValue(value.alterEgoName),
     alterEgoRole: stringValue(value.alterEgoRole),
@@ -278,12 +284,15 @@ export function parseStudioMemberPatch(
   if ("image" in value) patch.image = normalizeUrl(value.image);
   if ("bioTitle" in value) patch.bioTitle = stringValue(value.bioTitle, "Bio");
   if ("bioHtml" in value) patch.bioHtml = richTextField(value.bioHtml);
+  if ("showBioCard" in value) patch.showBioCard = value.showBioCard !== false;
   if ("areasTitle" in value) patch.areasTitle = stringValue(value.areasTitle, "Disciplines");
   if ("areas" in value) patch.areas = stringArray(value.areas);
+  if ("showAreasCard" in value) patch.showAreasCard = value.showAreasCard !== false;
   if ("selectedWorkTitle" in value) {
     patch.selectedWorkTitle = stringValue(value.selectedWorkTitle, "Selected Work");
   }
-  if ("selectedWorkHtml" in value) patch.selectedWorkHtml = richTextField(value.selectedWorkHtml);
+  if ("selectedWorkIds" in value) patch.selectedWorkIds = stringArray(value.selectedWorkIds);
+  if ("showSelectedWork" in value) patch.showSelectedWork = value.showSelectedWork !== false;
   if ("alterEgoEnabled" in value) patch.alterEgoEnabled = value.alterEgoEnabled === true;
   if ("alterEgoName" in value) patch.alterEgoName = stringValue(value.alterEgoName);
   if ("alterEgoRole" in value) patch.alterEgoRole = stringValue(value.alterEgoRole);

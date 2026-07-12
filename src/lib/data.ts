@@ -16,6 +16,8 @@ export interface FieldNote {
   links: { label: string; url: string }[];
   seoTags: string[];
   published: boolean;
+  /** When true, published note is omitted from the homepage Field Notes carousel */
+  hideFromHome: boolean;
   createdAt: string;
   updatedAt: string;
 }
@@ -37,10 +39,16 @@ export interface StudioMember {
   image: string;
   bioTitle: string;
   bioHtml: string;
+  showBioCard: boolean;
   areasTitle: string;
   areas: string[];
+  showAreasCard: boolean;
   selectedWorkTitle: string;
-  selectedWorkHtml: string;
+  /** Ordered published field-note IDs for the Selected Work carousel */
+  selectedWorkIds: string[];
+  showSelectedWork: boolean;
+  /** @deprecated kept for migration; prefer selectedWorkIds */
+  selectedWorkHtml?: string;
   /** Second persona toggled via the profile photo */
   alterEgoEnabled: boolean;
   alterEgoName: string;
@@ -126,7 +134,18 @@ export interface LampWord {
 // --- Field Notes ---
 
 export async function getEntries(): Promise<FieldNote[]> {
-  return readJSON<FieldNote[]>("entries.json", getDefaultEntries());
+  const entries = await readJSON<FieldNote[]>("entries.json", getDefaultEntries());
+  return entries.map(normalizeFieldNote);
+}
+
+function normalizeFieldNote(raw: FieldNote): FieldNote {
+  return {
+    ...raw,
+    hideFromHome: raw.hideFromHome === true,
+    seoTags: Array.isArray(raw.seoTags) ? raw.seoTags : [],
+    images: Array.isArray(raw.images) ? raw.images : [],
+    links: Array.isArray(raw.links) ? raw.links : [],
+  };
 }
 
 export async function getPublishedEntries(): Promise<FieldNote[]> {
@@ -134,9 +153,25 @@ export async function getPublishedEntries(): Promise<FieldNote[]> {
   return all.filter((e) => e.published);
 }
 
+/** Published notes shown in the homepage Field Notes section */
+export async function getHomeEntries(): Promise<FieldNote[]> {
+  const published = await getPublishedEntries();
+  return published.filter((e) => !e.hideFromHome);
+}
+
+export async function getEntriesByIds(ids: string[]): Promise<FieldNote[]> {
+  if (!ids.length) return [];
+  const all = await getEntries();
+  const byId = new Map(all.map((e) => [e.id, e]));
+  return ids
+    .map((id) => byId.get(id))
+    .filter((e): e is FieldNote => Boolean(e && e.published));
+}
+
 export async function getEntry(id: string): Promise<FieldNote | null> {
   const entries = await getEntries();
-  return entries.find((e) => e.id === id || e.slug === id) ?? null;
+  const found = entries.find((e) => e.id === id || e.slug === id) ?? null;
+  return found;
 }
 
 export async function saveEntries(entries: FieldNote[]) {
@@ -150,6 +185,7 @@ export async function createEntry(
   const now = new Date().toISOString();
   const entry: FieldNote = {
     ...data,
+    hideFromHome: data.hideFromHome === true,
     id: uuid(),
     slug: uniqueSlug(data.slug || data.title, entries),
     createdAt: now,
@@ -454,15 +490,17 @@ function normalizeMemberRecord(raw: Partial<StudioMember>): StudioMember {
     image: raw.image || "",
     bioTitle: raw.bioTitle || "Bio",
     bioHtml: typeof raw.bioHtml === "string" ? raw.bioHtml : defaults.bioHtml,
+    showBioCard: raw.showBioCard !== false,
     areasTitle: raw.areasTitle || "Disciplines",
     areas: Array.isArray(raw.areas) ? raw.areas.filter(Boolean) : defaults.areas,
+    showAreasCard: raw.showAreasCard !== false,
     selectedWorkTitle: raw.selectedWorkTitle || "Selected Work",
+    selectedWorkIds: Array.isArray(raw.selectedWorkIds)
+      ? raw.selectedWorkIds.filter((id): id is string => typeof id === "string" && Boolean(id))
+      : [],
+    showSelectedWork: raw.showSelectedWork !== false,
     selectedWorkHtml:
-      typeof raw.selectedWorkHtml === "string"
-        ? raw.selectedWorkHtml
-        : isDefaultEl
-          ? defaults.selectedWorkHtml
-          : "",
+      typeof raw.selectedWorkHtml === "string" ? raw.selectedWorkHtml : "",
     alterEgoEnabled:
       raw.alterEgoEnabled === true ||
       (raw.alterEgoEnabled === undefined && Boolean(alterEgoName || alterEgoImage)),
@@ -521,6 +559,7 @@ function getDefaultMembers(): StudioMember[] {
         "</ul>",
         "<p>My creative practice also exists under the name <strong>Gamotwox</strong>, exploring art, mythology, technology, and the pursuit of light through uncertainty.</p>",
       ].join(""),
+      showBioCard: true,
       areasTitle: "Disciplines",
       areas: [
         "Creative Direction",
@@ -533,9 +572,11 @@ function getDefaultMembers(): StudioMember[] {
         "Web3",
         "Brand Strategy",
       ],
+      showAreasCard: true,
       selectedWorkTitle: "Selected Work",
-      selectedWorkHtml:
-        "<p>Portfolio details can be expanded through future content updates. For now, the live Maiba archive carries the public body of field notes, studies, and studio fragments.</p>",
+      selectedWorkIds: [],
+      showSelectedWork: true,
+      selectedWorkHtml: "",
       alterEgoEnabled: true,
       alterEgoName: "Gamotwox",
       alterEgoRole: "The Seeker · Moth Cultist",
@@ -611,6 +652,7 @@ function getDefaultEntries(): FieldNote[] {
       links: [],
       seoTags: ["tattoo", "moth", "body art", "concept art"],
       published: true,
+      hideFromHome: false,
       createdAt: now,
       updatedAt: now,
     },
@@ -629,6 +671,7 @@ function getDefaultEntries(): FieldNote[] {
       links: [],
       seoTags: ["PC build", "GPU", "Blender", "Unreal Engine"],
       published: true,
+      hideFromHome: false,
       createdAt: now,
       updatedAt: now,
     },
@@ -647,6 +690,7 @@ function getDefaultEntries(): FieldNote[] {
       links: [],
       seoTags: ["D&D", "TTRPG", "character lore", "worldbuilding"],
       published: true,
+      hideFromHome: false,
       createdAt: now,
       updatedAt: now,
     },
@@ -665,6 +709,7 @@ function getDefaultEntries(): FieldNote[] {
       links: [],
       seoTags: ["creativity", "studio log", "process"],
       published: true,
+      hideFromHome: false,
       createdAt: now,
       updatedAt: now,
     },
@@ -683,6 +728,7 @@ function getDefaultEntries(): FieldNote[] {
       links: [],
       seoTags: ["ink drawing", "moth", "observational art"],
       published: true,
+      hideFromHome: false,
       createdAt: now,
       updatedAt: now,
     },
@@ -701,6 +747,7 @@ function getDefaultEntries(): FieldNote[] {
       links: [],
       seoTags: ["color theory", "branding", "design"],
       published: true,
+      hideFromHome: false,
       createdAt: now,
       updatedAt: now,
     },

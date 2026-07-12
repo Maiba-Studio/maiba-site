@@ -32,6 +32,7 @@ export default function EntryForm({ entry, availableTags, onSaved }: Props) {
   const [seoTags, setSeoTags] = useState<string[]>(entry?.seoTags ?? []);
   const [seoTagInput, setSeoTagInput] = useState("");
   const [published, setPublished] = useState(entry?.published ?? false);
+  const [hideFromHome, setHideFromHome] = useState(entry?.hideFromHome ?? false);
 
   const addSeoTag = (value: string) => {
     const trimmed = value.trim().replace(/^#/, "");
@@ -73,6 +74,7 @@ export default function EntryForm({ entry, availableTags, onSaved }: Props) {
       links: [],
       seoTags,
       published,
+      hideFromHome,
     };
 
     try {
@@ -238,6 +240,30 @@ export default function EntryForm({ entry, availableTags, onSaved }: Props) {
             {published ? "Published" : "Draft"}
           </span>
         </label>
+
+        {published && (
+          <label className="flex items-center gap-3 cursor-pointer">
+            <div
+              className={`w-10 h-5 rounded-full relative transition-colors ${
+                hideFromHome ? "bg-maiba-red/40" : "bg-malamaya-border"
+              }`}
+              onClick={() => setHideFromHome(!hideFromHome)}
+            >
+              <div
+                className={`absolute top-0.5 w-4 h-4 rounded-full transition-all ${
+                  hideFromHome
+                    ? "left-5 bg-maiba-red"
+                    : "left-0.5 bg-malamaya"
+                }`}
+              />
+            </div>
+            <span className="text-sm text-malamaya">
+              {hideFromHome
+                ? "Hidden from homepage Field Notes"
+                : "Shown on homepage Field Notes"}
+            </span>
+          </label>
+        )}
 
         {error && <p className="text-maiba-red text-sm">{error}</p>}
 

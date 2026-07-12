@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import MemberProfile from "@/components/MemberProfile";
-import { getPublishedMember } from "@/lib/data";
+import { getEntriesByIds, getPublishedMember } from "@/lib/data";
 
 type Props = {
   params: Promise<{ slug: string }>;
@@ -30,5 +30,6 @@ export default async function MemberPage({ params }: Props) {
   const { slug } = await params;
   const member = await getPublishedMember(slug);
   if (!member) notFound();
-  return <MemberProfile member={member} />;
+  const selectedWork = await getEntriesByIds(member.selectedWorkIds || []);
+  return <MemberProfile member={member} selectedWork={selectedWork} />;
 }

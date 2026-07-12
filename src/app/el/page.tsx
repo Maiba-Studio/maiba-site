@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import MemberProfile from "@/components/MemberProfile";
-import { getPublishedMember } from "@/lib/data";
+import { getEntriesByIds, getPublishedMember } from "@/lib/data";
 
 export async function generateMetadata(): Promise<Metadata> {
   const member = await getPublishedMember("el");
@@ -29,5 +29,6 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function ELBonuanPage() {
   const member = await getPublishedMember("el");
   if (!member) notFound();
-  return <MemberProfile member={member} />;
+  const selectedWork = await getEntriesByIds(member.selectedWorkIds || []);
+  return <MemberProfile member={member} selectedWork={selectedWork} />;
 }

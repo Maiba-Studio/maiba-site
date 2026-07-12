@@ -4,10 +4,11 @@ import Image from "next/image";
 import Link from "next/link";
 import { FormEvent, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { ChevronDown, ChevronUp } from "lucide-react";
 import AdminShell from "@/components/admin/AdminShell";
 import RichTextEditor from "@/components/admin/RichTextEditor";
 import SocialLinksEditor from "@/components/admin/SocialLinksEditor";
-import type { SocialLink, StudioMember } from "@/lib/data";
+import type { FieldNote, SocialLink, StudioMember } from "@/lib/data";
 
 type MemberFormState = Omit<StudioMember, "id" | "createdAt" | "updatedAt">;
 
@@ -19,9 +20,13 @@ const emptyMember = (): MemberFormState => ({
   image: "",
   bioTitle: "Bio",
   bioHtml: "",
+  showBioCard: true,
   areasTitle: "Disciplines",
   areas: [],
+  showAreasCard: true,
   selectedWorkTitle: "Selected Work",
+  selectedWorkIds: [],
+  showSelectedWork: true,
   selectedWorkHtml: "",
   alterEgoEnabled: false,
   alterEgoName: "",
@@ -47,10 +52,14 @@ function formFromMember(data: StudioMember): MemberFormState {
     image: data.image || "",
     bioTitle: data.bioTitle || "Bio",
     bioHtml: data.bioHtml || "",
+    showBioCard: data.showBioCard !== false,
     areasTitle: data.areasTitle || "Disciplines",
     areas: data.areas || [],
+    showAreasCard: data.showAreasCard !== false,
     selectedWorkTitle: data.selectedWorkTitle || "Selected Work",
-    selectedWorkHtml: data.selectedWorkHtml || "",
+    selectedWorkIds: Array.isArray(data.selectedWorkIds) ? data.selectedWorkIds : [],
+    showSelectedWork: data.showSelectedWork !== false,
+    selectedWorkHtml: "",
     alterEgoEnabled: data.alterEgoEnabled === true,
     alterEgoName: data.alterEgoName || "",
     alterEgoRole: data.alterEgoRole || "",
@@ -79,10 +88,22 @@ export default function MemberEditorPage({
   const isNew = !memberId;
   const [form, setForm] = useState<MemberFormState>(emptyMember());
   const [areasText, setAreasText] = useState("");
+  const [availableNotes, setAvailableNotes] = useState<FieldNote[]>([]);
   const [loading, setLoading] = useState(!isNew);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState("");
+
+  useEffect(() => {
+    fetch("/api/entries?all=true")
+      .then((r) => r.json())
+      .then((data) => {
+        if (Array.isArray(data)) {
+          setAvailableNotes(data.filter((e: FieldNote) => e.published));
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   useEffect(() => {
     if (!memberId) return;
@@ -243,13 +264,24 @@ export default function MemberEditorPage({
             className="admin-input"
           />
         </Field>
-        <Field label="Bio">
-          <RichTextEditor
-            content={form.bioHtml}
-            onChange={(html) => patch({ bioHtml: html })}
-            placeholder="Member bio..."
+        <label className="flex items-center gap-3 text-sm text-malamaya-light">
+          <input
+            type="checkbox"
+            checked={form.showBioCard}
+            onChange={(e) => patch({ showBioCard: e.target.checked })}
+            className="accent-maiba-red"
           />
-        </Field>
+          Show Bio card on public page
+        </label>
+        {form.showBioCard && (
+          <Field label="Bio">
+            <RichTextEditor
+              content={form.bioHtml}
+              onChange={(html) => patch({ bioHtml: html })}
+              placeholder="Member bio..."
+            />
+          </Field>
+        )}
 
         <Field label="Disciplines Section Title">
           <input
@@ -259,14 +291,25 @@ export default function MemberEditorPage({
             className="admin-input"
           />
         </Field>
-        <Field label="Disciplines" hint="One per line">
-          <textarea
-            value={areasText}
-            onChange={(e) => setAreasText(e.target.value)}
-            rows={6}
-            className="admin-input"
+        <label className="flex items-center gap-3 text-sm text-malamaya-light">
+          <input
+            type="checkbox"
+            checked={form.showAreasCard}
+            onChange={(e) => patch({ showAreasCard: e.target.checked })}
+            className="accent-maiba-red"
           />
-        </Field>
+          Show Disciplines card on public page
+        </label>
+        {form.showAreasCard && (
+          <Field label="Disciplines" hint="One per line">
+            <textarea
+              value={areasText}
+              onChange={(e) => setAreasText(e.target.value)}
+              rows={6}
+              className="admin-input"
+            />
+          </Field>
+        )}
 
         <Field label="Selected Work Title">
           <input
@@ -276,13 +319,108 @@ export default function MemberEditorPage({
             className="admin-input"
           />
         </Field>
-        <Field label="Selected Work">
-          <RichTextEditor
-            content={form.selectedWorkHtml}
-            onChange={(html) => patch({ selectedWorkHtml: html })}
-            placeholder="Selected work / portfolio notes..."
+        <label className="flex items-center gap-3 text-sm text-malamaya-light">
+          <input
+            type="checkbox"
+            checked={form.showSelectedWork}
+            onChange={(e) => patch({ showSelectedWork: e.target.checked })}
+            className="accent-maiba-red"
           />
-        </Field>
+          Show Selected Work carousel on public page
+        </label>
+        {form.showSelectedWork && (
+          <div className="border border-malamaya-border/20 rounded-sm p-4 space-y-4">
+            <p className="text-xs tracking-widest uppercase text-malamaya-light">
+              Field Notes Carousel
+            </p>
+            <p className="text-malamaya-border text-xs">
+              Choose published field notes and arrange their order. Notes hidden from the homepage can still be selected here.
+            </p>
+
+            <Field label="Add field note">
+              <select
+                className="admin-input"
+                value=""
+                onChange={(e) => {
+                  const id = e.target.value;
+                  if (!id || form.selectedWorkIds.includes(id)) return;
+                  patch({ selectedWorkIds: [...form.selectedWorkIds, id] });
+                }}
+              >
+                <option value="">Select a published note…</option>
+                {availableNotes
+                  .filter((n) => !form.selectedWorkIds.includes(n.id))
+                  .map((n) => (
+                    <option key={n.id} value={n.id}>
+                      {n.title}
+                      {n.hideFromHome ? " (hidden from home)" : ""}
+                    </option>
+                  ))}
+              </select>
+            </Field>
+
+            <div className="space-y-2">
+              {form.selectedWorkIds.map((id, index) => {
+                const note = availableNotes.find((n) => n.id === id);
+                return (
+                  <div
+                    key={id}
+                    className="flex items-center gap-2 border border-malamaya-border/20 rounded-sm px-3 py-2 min-w-0"
+                  >
+                    <span className="text-xs text-malamaya-border w-5 flex-shrink-0">
+                      {index + 1}
+                    </span>
+                    <span className="text-sm text-foreground truncate flex-1 min-w-0">
+                      {note?.title || id}
+                    </span>
+                    <button
+                      type="button"
+                      disabled={index === 0}
+                      onClick={() => {
+                        const next = [...form.selectedWorkIds];
+                        const [item] = next.splice(index, 1);
+                        next.splice(index - 1, 0, item);
+                        patch({ selectedWorkIds: next });
+                      }}
+                      className="w-7 h-7 flex items-center justify-center text-malamaya hover:text-foreground disabled:opacity-20"
+                      title="Move up"
+                    >
+                      <ChevronUp className="w-3.5 h-3.5" strokeWidth={2} />
+                    </button>
+                    <button
+                      type="button"
+                      disabled={index === form.selectedWorkIds.length - 1}
+                      onClick={() => {
+                        const next = [...form.selectedWorkIds];
+                        const [item] = next.splice(index, 1);
+                        next.splice(index + 1, 0, item);
+                        patch({ selectedWorkIds: next });
+                      }}
+                      className="w-7 h-7 flex items-center justify-center text-malamaya hover:text-foreground disabled:opacity-20"
+                      title="Move down"
+                    >
+                      <ChevronDown className="w-3.5 h-3.5" strokeWidth={2} />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        patch({
+                          selectedWorkIds: form.selectedWorkIds.filter((x) => x !== id),
+                        })
+                      }
+                      className="text-[10px] tracking-widest uppercase text-maiba-red/60 hover:text-maiba-red px-2"
+                    >
+                      Remove
+                    </button>
+                  </div>
+                );
+              })}
+              {form.selectedWorkIds.length === 0 && (
+                <p className="text-malamaya-border text-sm">No notes selected yet.</p>
+              )}
+            </div>
+          </div>
+        )}
 
         <div className="border border-malamaya-border/20 rounded-sm p-4 sm:p-5 space-y-4">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
