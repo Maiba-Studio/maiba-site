@@ -1,4 +1,4 @@
-import type { FieldNote, LampWord, SiteContent, SocialLink, StudioMember, UserRole } from "@/lib/data";
+import type { FieldNote, LampWord, Project, ProjectsPageContent, SiteContent, SocialLink, StudioMember, UserRole } from "@/lib/data";
 import { prepareFieldNoteBody, richTextField } from "@/lib/sanitize";
 
 const USER_ROLES = ["admin", "moderator"] as const;
@@ -304,6 +304,57 @@ export function parseStudioMemberPatch(
   if ("locationNote" in value) patch.locationNote = stringValue(value.locationNote);
   if ("published" in value) patch.published = value.published === true;
   if ("noindex" in value) patch.noindex = value.noindex === true;
+  if ("seoTitle" in value) patch.seoTitle = stringValue(value.seoTitle);
+  if ("seoDescription" in value) patch.seoDescription = stringValue(value.seoDescription);
+
+  return patch;
+}
+
+type ProjectInput = Omit<Project, "id" | "createdAt" | "updatedAt">;
+
+export function parseProjectsPageContent(value: unknown): ProjectsPageContent | null {
+  if (!isRecord(value)) return null;
+  return {
+    title: stringValue(value.title, "Projects"),
+    subtitle: stringValue(value.subtitle),
+  };
+}
+
+export function parseProjectInput(value: unknown): ProjectInput | null {
+  if (!isRecord(value)) return null;
+  const title = stringValue(value.title);
+  if (!title) return null;
+
+  return {
+    slug: normalizeSlug(value.slug || title),
+    title,
+    excerpt: stringValue(value.excerpt),
+    thumbnail: normalizeUrl(value.thumbnail),
+    bodyHtml: richTextField(value.bodyHtml),
+    links: parseSocialLinks(value.links),
+    published: value.published === true,
+    sortOrder: typeof value.sortOrder === "number" ? value.sortOrder : 0,
+    seoTitle: stringValue(value.seoTitle),
+    seoDescription: stringValue(value.seoDescription),
+  };
+}
+
+export function parseProjectPatch(
+  value: unknown
+): Partial<Omit<Project, "id" | "createdAt">> | null {
+  if (!isRecord(value)) return null;
+  const patch: Partial<Omit<Project, "id" | "createdAt">> = {};
+
+  if ("slug" in value) patch.slug = normalizeSlug(value.slug);
+  if ("title" in value) patch.title = stringValue(value.title);
+  if ("excerpt" in value) patch.excerpt = stringValue(value.excerpt);
+  if ("thumbnail" in value) patch.thumbnail = normalizeUrl(value.thumbnail);
+  if ("bodyHtml" in value) patch.bodyHtml = richTextField(value.bodyHtml);
+  if ("links" in value) patch.links = parseSocialLinks(value.links);
+  if ("published" in value) patch.published = value.published === true;
+  if ("sortOrder" in value && typeof value.sortOrder === "number") {
+    patch.sortOrder = value.sortOrder;
+  }
   if ("seoTitle" in value) patch.seoTitle = stringValue(value.seoTitle);
   if ("seoDescription" in value) patch.seoDescription = stringValue(value.seoDescription);
 

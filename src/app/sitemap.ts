@@ -1,12 +1,17 @@
 import type { MetadataRoute } from "next";
-import { getPublishedEntries, getPublishedMembers } from "@/lib/data";
+import {
+  getPublishedEntries,
+  getPublishedMembers,
+  getPublishedProjects,
+} from "@/lib/data";
 
 const baseUrl = "https://maiba.studio";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const [entries, members] = await Promise.all([
+  const [entries, members, projects] = await Promise.all([
     getPublishedEntries(),
     getPublishedMembers(),
+    getPublishedProjects(),
   ]);
   const now = new Date();
 
@@ -16,6 +21,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     "/archive",
     "/contact",
     "/ritual",
+    "/projects",
   ].map((path) => ({
     url: `${baseUrl}${path}`,
     lastModified: now,
@@ -36,6 +42,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       lastModified: new Date(member.updatedAt || member.createdAt),
     }));
 
-  return [...staticRoutes, ...fieldNotes, ...memberPages];
-}
+  const projectPages: MetadataRoute.Sitemap = projects.map((project) => ({
+    url: `${baseUrl}/projects/${project.slug}`,
+    lastModified: new Date(project.updatedAt || project.createdAt),
+  }));
 
+  return [...staticRoutes, ...fieldNotes, ...memberPages, ...projectPages];
+}

@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
 import { ReactNode, useEffect, useState } from "react";
-import { LayoutDashboard, BookOpen, Globe, Settings, LogOut, Menu, X, Users, type LucideIcon } from "lucide-react";
+import { LayoutDashboard, BookOpen, Globe, Settings, LogOut, Menu, X, Users, FolderKanban, type LucideIcon } from "lucide-react";
 
 interface NavItem {
   href: string;
@@ -16,6 +16,7 @@ interface NavItem {
 const navItems: NavItem[] = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
   { href: "/admin/entries", label: "Field Notes", icon: BookOpen },
+  { href: "/admin/projects", label: "Projects", icon: FolderKanban, adminOnly: true },
   { href: "/admin/site", label: "Site Content", icon: Globe, adminOnly: true },
   { href: "/admin/members", label: "Members", icon: Users, adminOnly: true },
   { href: "/admin/accounts", label: "Accounts", icon: Settings, adminOnly: true },

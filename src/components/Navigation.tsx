@@ -10,6 +10,7 @@ const links = [
   { href: "#home", label: "Home" },
   { href: "#about", label: "About" },
   { href: "#who", label: "Who" },
+  { href: "/projects", label: "Projects" },
   { href: "#archive", label: "Field Notes" },
   { href: "#contact", label: "Join the Cult" },
 ];
@@ -21,8 +22,15 @@ export default function Navigation() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 
+  const onProjects = pathname.startsWith("/projects");
+
   useEffect(() => {
-    const sectionIds = links.map((l) => l.href.slice(1));
+    if (pathname !== "/") return;
+
+    const sectionIds = links
+      .filter((l) => l.href.startsWith("#"))
+      .map((l) => l.href.slice(1));
+
     const handleScroll = () => {
       setScrolled(window.scrollY > 60);
 
@@ -40,21 +48,38 @@ export default function Navigation() {
     window.addEventListener("scroll", handleScroll, { passive: true });
     handleScroll();
     return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+  }, [pathname]);
 
-  const scrollTo = useCallback((href: string) => {
-    if (pathname !== "/") {
-      router.push(`/${href}`);
+  useEffect(() => {
+    if (pathname !== "/") setScrolled(true);
+  }, [pathname]);
+
+  const go = useCallback(
+    (href: string) => {
+      if (href.startsWith("/")) {
+        router.push(href);
+        setMobileOpen(false);
+        return;
+      }
+
+      if (pathname !== "/") {
+        router.push(`/${href}`);
+        setMobileOpen(false);
+        return;
+      }
+
+      const el = document.getElementById(href.slice(1));
+      if (el) el.scrollIntoView({ behavior: "smooth" });
       setMobileOpen(false);
-      return;
-    }
+    },
+    [pathname, router]
+  );
 
-    const el = document.getElementById(href.slice(1));
-    if (el) {
-      el.scrollIntoView({ behavior: "smooth" });
-    }
-    setMobileOpen(false);
-  }, [pathname, router]);
+  const isActive = (href: string) => {
+    if (href.startsWith("/")) return pathname.startsWith(href);
+    if (onProjects) return false;
+    return pathname === "/" && activeSection === href;
+  };
 
   return (
     <nav
@@ -80,14 +105,13 @@ export default function Navigation() {
           />
         </a>
 
-        {/* Desktop nav */}
         <div className="hidden md:flex items-center gap-8">
           {links.map((link) => (
             <button
               key={link.href}
-              onClick={() => scrollTo(link.href)}
+              onClick={() => go(link.href)}
               className={`text-sm tracking-widest uppercase transition-colors duration-500 ${
-                activeSection === link.href
+                isActive(link.href)
                   ? "text-maiba-red"
                   : "text-malamaya-light hover:text-foreground"
               }`}
@@ -98,7 +122,6 @@ export default function Navigation() {
           <MothModeToggle />
         </div>
 
-        {/* Mobile hamburger */}
         <button
           onClick={() => setMobileOpen(!mobileOpen)}
           className="md:hidden text-foreground p-2"
@@ -121,31 +144,29 @@ export default function Navigation() {
         </button>
       </div>
 
-      {/* Mobile menu */}
       <AnimatePresence>
         {mobileOpen && (
           <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            transition={{ duration: 0.3 }}
-            className="md:hidden bg-midnight/95 backdrop-blur-md border-t border-malamaya-border"
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            className="md:hidden overflow-hidden bg-midnight/95 backdrop-blur-md border-b border-malamaya-border/20"
           >
-            <div className="px-6 py-8 flex flex-col gap-6">
+            <div className="px-6 py-4 flex flex-col gap-4">
               {links.map((link) => (
                 <button
                   key={link.href}
-                  onClick={() => scrollTo(link.href)}
-                  className={`text-lg tracking-widest uppercase text-left ${
-                    activeSection === link.href
-                      ? "text-maiba-red"
-                      : "text-malamaya-light"
+                  onClick={() => go(link.href)}
+                  className={`text-left text-sm tracking-widest uppercase transition-colors ${
+                    isActive(link.href) ? "text-maiba-red" : "text-malamaya-light"
                   }`}
                 >
                   {link.label}
                 </button>
               ))}
-              <MothModeToggle />
+              <div className="pt-2">
+                <MothModeToggle />
+              </div>
             </div>
           </motion.div>
         )}

@@ -131,6 +131,27 @@ export interface LampWord {
   link: string;
 }
 
+export interface Project {
+  id: string;
+  slug: string;
+  title: string;
+  excerpt: string;
+  thumbnail: string;
+  bodyHtml: string;
+  links: SocialLink[];
+  published: boolean;
+  sortOrder: number;
+  seoTitle: string;
+  seoDescription: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ProjectsPageContent {
+  title: string;
+  subtitle: string;
+}
+
 // --- Field Notes ---
 
 export async function getEntries(): Promise<FieldNote[]> {
@@ -366,6 +387,139 @@ export async function deleteLampWord(id: string): Promise<boolean> {
   if (filtered.length === words.length) return false;
   await saveLampWords(filtered);
   return true;
+}
+
+// --- Projects ---
+
+export async function getProjectsPageContent(): Promise<ProjectsPageContent> {
+  const defaults = getDefaultProjectsPageContent();
+  const saved = await readJSON<Partial<ProjectsPageContent>>(
+    "projects-page.json",
+    defaults
+  );
+  return {
+    title: saved.title || defaults.title,
+    subtitle: saved.subtitle || defaults.subtitle,
+  };
+}
+
+export async function saveProjectsPageContent(content: ProjectsPageContent) {
+  await writeJSON("projects-page.json", content);
+}
+
+export async function getProjects(): Promise<Project[]> {
+  const saved = await readJSON<Project[]>("projects.json", []);
+  const projects = (Array.isArray(saved) ? saved : []).map(normalizeProject);
+  return projects.sort((a, b) => a.sortOrder - b.sortOrder || a.title.localeCompare(b.title));
+}
+
+export async function getPublishedProjects(): Promise<Project[]> {
+  const projects = await getProjects();
+  return projects.filter((p) => p.published);
+}
+
+export async function getProject(idOrSlug: string): Promise<Project | null> {
+  const projects = await getProjects();
+  return projects.find((p) => p.id === idOrSlug || p.slug === idOrSlug) ?? null;
+}
+
+export async function getPublishedProject(idOrSlug: string): Promise<Project | null> {
+  const project = await getProject(idOrSlug);
+  if (!project || !project.published) return null;
+  return project;
+}
+
+export async function saveProjects(projects: Project[]) {
+  await writeJSON("projects.json", projects);
+}
+
+export async function createProject(
+  data: Omit<Project, "id" | "createdAt" | "updatedAt">
+): Promise<Project> {
+  const projects = await getProjects();
+  const now = new Date().toISOString();
+  const project: Project = {
+    ...data,
+    id: uuid(),
+    slug: uniqueProjectSlug(data.slug || data.title, projects),
+    links: (data.links ?? []).map(normalizeSocialLink),
+    sortOrder: typeof data.sortOrder === "number" ? data.sortOrder : projects.length,
+    createdAt: now,
+    updatedAt: now,
+  };
+  projects.push(project);
+  await saveProjects(projects);
+  return project;
+}
+
+export async function updateProject(
+  id: string,
+  data: Partial<Omit<Project, "id" | "createdAt">>
+): Promise<Project | null> {
+  const projects = await getProjects();
+  const idx = projects.findIndex((p) => p.id === id);
+  if (idx === -1) return null;
+
+  const nextSlug =
+    data.slug !== undefined
+      ? uniqueProjectSlug(
+          data.slug || projects[idx].title,
+          projects.filter((p) => p.id !== id)
+        )
+      : projects[idx].slug;
+
+  projects[idx] = {
+    ...projects[idx],
+    ...data,
+    slug: nextSlug,
+    links: data.links ? data.links.map(normalizeSocialLink) : projects[idx].links,
+    updatedAt: new Date().toISOString(),
+  };
+  await saveProjects(projects);
+  return projects[idx];
+}
+
+export async function deleteProject(id: string): Promise<boolean> {
+  const projects = await getProjects();
+  const filtered = projects.filter((p) => p.id !== id);
+  if (filtered.length === projects.length) return false;
+  await saveProjects(filtered);
+  return true;
+}
+
+function normalizeProject(raw: Partial<Project>): Project {
+  return {
+    id: raw.id || uuid(),
+    slug: raw.slug || "project",
+    title: raw.title || "Untitled Project",
+    excerpt: raw.excerpt || "",
+    thumbnail: raw.thumbnail || "",
+    bodyHtml: typeof raw.bodyHtml === "string" ? raw.bodyHtml : "",
+    links: Array.isArray(raw.links) ? raw.links.map(normalizeSocialLink) : [],
+    published: raw.published === true,
+    sortOrder: typeof raw.sortOrder === "number" ? raw.sortOrder : 0,
+    seoTitle: raw.seoTitle || "",
+    seoDescription: raw.seoDescription || "",
+    createdAt: raw.createdAt || new Date().toISOString(),
+    updatedAt: raw.updatedAt || new Date().toISOString(),
+  };
+}
+
+function uniqueProjectSlug(value: string, projects: Project[]): string {
+  const base = slugify(value) || "project";
+  const used = new Set(projects.map((p) => p.slug).filter(Boolean));
+  if (!used.has(base)) return base;
+  let i = 2;
+  while (used.has(`${base}-${i}`)) i += 1;
+  return `${base}-${i}`;
+}
+
+function getDefaultProjectsPageContent(): ProjectsPageContent {
+  return {
+    title: "Projects",
+    subtitle:
+      "Selected works from Maiba Studio — products, experiments, and worlds in progress.",
+  };
 }
 
 // --- Studio Members ---
