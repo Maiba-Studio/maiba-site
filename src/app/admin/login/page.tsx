@@ -4,11 +4,13 @@ import Link from "next/link";
 import { useState, FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
+import { Eye, EyeOff } from "lucide-react";
 
 export default function AdminLogin() {
   const router = useRouter();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -73,14 +75,28 @@ export default function AdminLogin() {
             <label className="text-xs tracking-widest uppercase text-malamaya mb-2 block">
               Password
             </label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              autoComplete="current-password"
-              className="w-full bg-transparent border border-malamaya-border rounded-sm px-4 py-3 text-foreground focus:border-maiba-red focus:outline-none transition-colors"
-            />
+            <div className="relative">
+              <input
+                type={showPassword ? "text" : "password"}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                autoComplete="current-password"
+                className="w-full bg-transparent border border-malamaya-border rounded-sm px-4 py-3 pr-11 text-foreground focus:border-maiba-red focus:outline-none transition-colors"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword((v) => !v)}
+                className="absolute right-2 top-1/2 -translate-y-1/2 text-malamaya hover:text-foreground transition-colors p-1"
+                aria-label={showPassword ? "Hide password" : "Show password"}
+              >
+                {showPassword ? (
+                  <EyeOff className="w-4 h-4" strokeWidth={1.5} />
+                ) : (
+                  <Eye className="w-4 h-4" strokeWidth={1.5} />
+                )}
+              </button>
+            </div>
           </div>
 
           {error && (
