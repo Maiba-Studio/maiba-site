@@ -41,7 +41,7 @@ export default function Footer() {
   const hasReachedBottom = useRef(false);
 
   useEffect(() => {
-    fetch("/api/site-content")
+    fetch("/api/site-content", { cache: "no-store" })
       .then((r) => r.json())
       .then((data) => {
         if (data.ritual) {

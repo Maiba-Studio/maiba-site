@@ -54,7 +54,7 @@ export default function ArchiveSection() {
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const fetchEntries = useCallback(() => {
-    fetch("/api/entries")
+    fetch("/api/entries", { cache: "no-store" })
       .then((r) => r.json())
       .then((data) => {
         if (Array.isArray(data)) setEntries(data);
@@ -69,7 +69,7 @@ export default function ArchiveSection() {
   }, [fetchEntries]);
 
   useEffect(() => {
-    fetch("/api/site-content")
+    fetch("/api/site-content", { cache: "no-store" })
       .then((r) => r.json())
       .then((data) => {
         if (data.archive) setContent({ ...defaultArchive, ...data.archive });

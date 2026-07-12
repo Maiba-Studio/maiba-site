@@ -47,7 +47,7 @@ export default function EntriesPage() {
       })
       .catch(() => setLoading(false));
 
-    fetch("/api/site-content")
+    fetch("/api/site-content", { cache: "no-store" })
       .then((r) => r.json())
       .then((data: SiteContent) => setSiteContent(data))
       .catch(() => {});

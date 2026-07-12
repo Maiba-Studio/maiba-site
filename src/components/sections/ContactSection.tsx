@@ -55,7 +55,7 @@ export default function ContactSection() {
   const canSubmit = Boolean(nameValue && emailValue && messageValue);
 
   useEffect(() => {
-    fetch("/api/site-content")
+    fetch("/api/site-content", { cache: "no-store" })
       .then((r) => r.json())
       .then((data) => {
         if (data.contact) setContent({ ...defaults, ...data.contact });

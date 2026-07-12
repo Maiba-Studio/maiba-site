@@ -59,7 +59,7 @@ export default function SiteContentPage() {
   const [lampSaving, setLampSaving] = useState(false);
 
   useEffect(() => {
-    fetch("/api/site-content")
+    fetch("/api/site-content", { cache: "no-store" })
       .then((r) => r.json())
       .then((data: Partial<SiteContent>) => {
         setContent({

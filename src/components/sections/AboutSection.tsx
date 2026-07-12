@@ -58,7 +58,7 @@ export default function AboutSection() {
   const [content, setContent] = useState<AboutContent>(defaults);
 
   useEffect(() => {
-    fetch("/api/site-content")
+    fetch("/api/site-content", { cache: "no-store" })
       .then((r) => r.json())
       .then((data) => {
         if (!data.about) return;

@@ -36,7 +36,7 @@ export default function ProjectsSection() {
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const fetchProjects = useCallback(() => {
-    fetch("/api/projects")
+    fetch("/api/projects", { cache: "no-store" })
       .then((r) => r.json())
       .then((data) => {
         if (Array.isArray(data)) setProjects(data);
@@ -51,7 +51,7 @@ export default function ProjectsSection() {
   }, [fetchProjects]);
 
   useEffect(() => {
-    fetch("/api/projects/page")
+    fetch("/api/projects/page", { cache: "no-store" })
       .then((r) => r.json())
       .then((data) => {
         if (data && !data.error) {

@@ -6,7 +6,9 @@ import { parseSiteContent } from "@/lib/validation";
 
 export async function GET() {
   const content = await getSiteContent();
-  return NextResponse.json(content);
+  return NextResponse.json(content, {
+    headers: { "Cache-Control": "no-store, no-cache, must-revalidate" },
+  });
 }
 
 export async function PUT(req: NextRequest) {

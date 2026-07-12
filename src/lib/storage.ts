@@ -1,9 +1,12 @@
-import { put, del, list, get } from "@vercel/blob";
+import { put, get } from "@vercel/blob";
 import fs from "fs/promises";
 import path from "path";
 
 const DATA_DIR = path.join(process.cwd(), "data");
 const IS_VERCEL = !!process.env.BLOB_READ_WRITE_TOKEN;
+
+/** Minimum CDN TTL Blob allows (seconds). CMS JSON must stay fresh. */
+const CMS_CACHE_MAX_AGE = 60;
 
 async function ensureLocalDir() {
   try {
@@ -20,7 +23,11 @@ function blobKey(filename: string) {
 export async function readJSON<T>(filename: string, fallback: T): Promise<T> {
   if (IS_VERCEL) {
     try {
-      const result = await get(blobKey(filename), { access: "private" });
+      // Bypass Blob CDN — overwrites can take 60s+ to propagate when cached.
+      const result = await get(blobKey(filename), {
+        access: "private",
+        useCache: false,
+      });
       if (!result) return fallback;
       const response = new Response(result.stream);
       return (await response.json()) as T;
@@ -42,21 +49,13 @@ export async function writeJSON<T>(filename: string, data: T): Promise<void> {
   const json = JSON.stringify(data, null, 2);
 
   if (IS_VERCEL) {
-    const key = blobKey(filename);
-
-    try {
-      const existing = await list({ prefix: key });
-      for (const blob of existing.blobs) {
-        await del(blob.url);
-      }
-    } catch {
-      // no existing blob to delete — fine
-    }
-
-    await put(key, json, {
+    // Single overwrite put — avoid list+delete+put (slow admin saves + races).
+    await put(blobKey(filename), json, {
       access: "private",
       contentType: "application/json",
       addRandomSuffix: false,
+      allowOverwrite: true,
+      cacheControlMaxAge: CMS_CACHE_MAX_AGE,
     });
     return;
   }

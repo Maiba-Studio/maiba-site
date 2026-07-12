@@ -42,7 +42,7 @@ export default function RitualPage() {
   const [content, setContent] = useState<RitualContent>(defaults);
 
   useEffect(() => {
-    fetch("/api/site-content")
+    fetch("/api/site-content", { cache: "no-store" })
       .then((r) => r.json())
       .then((data) => {
         if (data.ritual) setContent({ ...defaults, ...data.ritual });
